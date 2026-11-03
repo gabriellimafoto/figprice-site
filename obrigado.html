@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Compra confirmada · FigPrice</title>
+<meta name="theme-color" content="#1a120d">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:#1a120d;color:#f1e9dd;font-family:"Figtree",system-ui,sans-serif;font-size:17px;line-height:1.55;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+main{width:min(620px,100% - 32px);margin:0 auto;padding:40px 0 70px}
+.marca{display:inline-flex;align-items:center;gap:10px;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.4rem;color:#f1e9dd;text-decoration:none}
+.marca img{width:34px;height:34px;border-radius:8px}
+h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:clamp(2.2rem,8vw,3.2rem);letter-spacing:-.03em;line-height:1.05;margin:28px 0 10px}
+.sub{color:#bfae99;margin:0 0 28px}
+ol{list-style:none;padding:0;margin:0;display:grid;gap:12px;counter-reset:p}
+li{background:#241912;border:1px solid #4a382b;border-radius:18px;padding:18px 18px 18px 64px;position:relative}
+li::before{counter-increment:p;content:counter(p);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;background:#e2b54a;color:#2a2420;font-weight:800;display:grid;place-items:center}
+li b{display:block;font-size:1.08rem;margin-bottom:4px}
+li p{margin:0;color:#d8ccbb}
+.alerta{border-color:#6cc0b2}
+.alerta::before{background:#6cc0b2;color:#11201e}
+.pastas{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pastas span{font-size:.85rem;font-weight:700;padding:5px 11px;border-radius:999px;background:#130c08;border:1px solid #4a382b}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;margin-top:22px;border-radius:14px;background:#e2b54a;color:#2a2420;font-weight:800;font-size:1.05rem;text-decoration:none}
+.btn.sec{background:transparent;color:#f1e9dd;border:1px solid #4a382b;margin-top:10px;font-weight:700}
+.nota{color:#bfae99;font-size:.92rem;margin-top:26px;text-align:center}
+.nota a{color:#e2b54a}
+</style>
+</head>
+<body>
+<main>
+  <a class="marca" href="/"><img src="icon-192.png" alt="">FigPrice</a>
+  <h1>Compra confirmada!</h1>
+  <p class="sub">Obrigado por assinar o FigPrice. Falta pouco para fazer seu primeiro orçamento.</p>
+  <ol>
+    <li><b>Abra o seu e-mail</b><p>O mesmo que você usou na compra. Seu <b style="display:inline;font-size:inherit">código de acesso</b> chega em poucos minutos, enviado por <b style="display:inline;font-size:inherit">contato@figprice.com.br</b>.</p></li>
+    <li class="alerta"><b>Não chegou? Olhe estas pastas</b><p>Às vezes o e-mail cai fora da caixa de entrada. Se achar lá, marque como "Não é spam" para os próximos chegarem certinho.</p>
+      <div class="pastas"><span>Spam</span><span>Lixo eletrônico</span><span>Promoções</span><span>Atualizações</span></div></li>
+    <li><b>Abra o app e ative</b><p>Digite o e-mail da compra e o código. Pronto: o app funciona até sem internet.</p></li>
+  </ol>
+  <a class="btn" href="/app">Abrir o FigPrice</a>
+  <a class="btn sec" href="/#duvidas">Como instalar no celular</a>
+  <p class="nota">Passou de 15 minutos e nada? Fale com a gente no <a href="https://instagram.com/forjaefuria" target="_blank" rel="noopener">Instagram @forjaefuria</a> ou pelo e-mail <a href="mailto:forjaefuria@outlook.com">forjaefuria@outlook.com</a>.</p>
+</main>
+</body>
+</html>
