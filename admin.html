@@ -43,16 +43,24 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .barra input{flex:1;min-width:200px}
 .filtros{display:flex;gap:6px;flex-wrap:wrap}
 .filtros button[aria-pressed="true"]{background:var(--verde);border-color:var(--verde);color:#11201e}
-.lista{display:grid;gap:10px}
-.lic{display:grid;grid-template-columns:1.6fr 1fr 1fr auto;gap:12px;align-items:center}
-.lic .em{font-weight:700;word-break:break-all}
-.lic .sub{color:var(--muted);font-size:.85rem}
+.lista{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+@media (max-width:420px){.lista{grid-template-columns:1fr}}
+.lic{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.lic .cab{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.lic .nm{font-weight:700;font-size:1.05rem;line-height:1.25;word-break:break-word}
+.lic .em{color:var(--muted);font-size:.8rem;word-break:break-all}
+.lic .info{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:.82rem}
+.aps{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--ink);white-space:nowrap}
+.aps svg{width:14px;height:14px}
+.aps.cheio{color:var(--ouro)}
 .tag{display:inline-block;font-size:.75rem;font-weight:800;padding:3px 9px;border-radius:20px;background:#3a2a20;color:var(--muted)}
 .tag.ativo{background:#1f4a43;color:#bfeee5}.tag.bloqueado{background:#5a1f19;color:#ffc9c2}.tag.vencida{background:#5a4513;color:#f3d48b}
-.acoes{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
-@media (max-width:820px){.lic{grid-template-columns:1fr}.acoes{justify-content:flex-start}}
-.nova{display:grid;grid-template-columns:2fr 1.5fr 1fr auto;gap:10px;align-items:end}
-@media (max-width:820px){.nova{grid-template-columns:1fr}}
+.acoes{display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--line);padding-top:10px}
+.acoes .btn.pq{min-height:30px;padding:4px 10px;font-size:.8rem}
+dialog{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:22px;width:min(440px,100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+.dlg-cab{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fechar{background:none;border:0;color:var(--muted);font-size:1.6rem;line-height:1;cursor:pointer;padding:4px 8px}
 .toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:9;font-weight:600}
 .check{display:flex;align-items:center;gap:8px;font-weight:600;margin-top:10px}
 .check input{width:auto}
@@ -79,19 +87,17 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
   </section>
 
   <section id="telaPainel" hidden>
-    <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px"><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
+    <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ouro" id="abrirNova">+ Nova licença</button><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
     <p class="carregando" id="carregando" hidden>Atualizando…</p>
     <div class="stats card" id="stats"></div>
-    <details class="card nova-box">
-      <summary style="font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:1.1rem;cursor:pointer">+ Nova licença</summary>
-      <div class="nova">
-        <div><label for="nEmail">E-mail</label><input id="nEmail" type="email" placeholder="cliente@email.com"></div>
-        <div><label for="nNome">Nome</label><input id="nNome" type="text" placeholder="Cortesia, testador..."></div>
-        <div><label for="nPlano">Acesso</label><select id="nPlano"><option value="0">Vitalício</option><option value="7">7 dias</option><option value="30">30 dias</option><option value="90">90 dias</option><option value="365">1 ano</option></select></div>
-        <button class="btn ouro" id="criar">Criar</button>
-      </div>
+    <dialog id="dlgNova">
+      <div class="dlg-cab"><h2>Nova licença</h2><button class="fechar" id="fecharNova" aria-label="Fechar">×</button></div>
+      <label for="nNome">Nome</label><input id="nNome" type="text" placeholder="Nome do cliente">
+      <label for="nEmail">E-mail</label><input id="nEmail" type="email" placeholder="cliente@email.com">
+      <label for="nPlano">Acesso</label><select id="nPlano"><option value="0">Vitalício</option><option value="7">7 dias</option><option value="30">30 dias</option><option value="90">90 dias</option><option value="365">1 ano</option></select>
       <label class="check"><input type="checkbox" id="nEnviar" checked> Mandar o e-mail com o código para a pessoa</label>
-    </details>
+      <button class="btn ouro" style="width:100%;margin-top:16px" id="criar">Criar licença</button>
+    </dialog>
     <div class="barra">
       <input id="busca" type="search" placeholder="Buscar por e-mail ou nome">
       <div class="filtros" id="filtros"></div>
@@ -170,37 +176,44 @@ function desenhar(){
   if (!lista.length){ const p = document.createElement("p"); p.className = "nota"; p.textContent = "Nenhuma licença encontrada."; $("lista").appendChild(p); }
   lista.forEach(l => {
     const s = situacao(l), c = document.createElement("div"); c.className = "card lic";
-    const col1 = document.createElement("div"); col1.innerHTML = '<div class="em"></div><div class="sub"></div>';
-    col1.children[0].textContent = l.email; col1.children[1].textContent = (l.nome || "") + " · código " + l.codigo;
-    const col2 = document.createElement("div"); col2.innerHTML = '<span class="tag ' + s + '"></span><div class="sub"></div>';
-    col2.children[0].textContent = s === "ativo" ? "Ativa" : s === "vencida" ? "Vencida" : "Bloqueada";
-    col2.children[1].textContent = l.validoAte ? "Válida até " + dataBR(l.validoAte) : "Vitalícia";
-    const col3 = document.createElement("div"); col3.className = "sub"; col3.textContent = l.aparelhos + " de 2 aparelhos · desde " + dataBR(l.data);
+    const cab = document.createElement("div"); cab.className = "cab";
+    cab.innerHTML = '<div><div class="nm"></div><div class="em"></div></div><span class="tag ' + s + '"></span>';
+    cab.querySelector(".nm").textContent = l.nome || l.email;
+    cab.querySelector(".em").textContent = (l.nome ? l.email + " · " : "") + "código " + l.codigo;
+    cab.querySelector(".tag").textContent = s === "ativo" ? "Ativa" : s === "vencida" ? "Vencida" : "Bloqueada";
+    const info = document.createElement("div"); info.className = "info";
+    const datas = document.createElement("span"); datas.textContent = "Desde " + dataBR(l.data) + " · " + (l.validoAte ? "válida até " + dataBR(l.validoAte) : "vitalícia");
+    const ap = Number(l.aparelhos) || 0, aps = document.createElement("span"); aps.className = "aps" + (ap >= 2 ? " cheio" : ""); aps.title = ap + " de 2 aparelhos em uso";
+    aps.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>';
+    aps.append(ap + "/2");
+    info.append(datas, aps);
     const ac = document.createElement("div"); ac.className = "acoes";
     const botao = (t, fn, cls) => { const b = document.createElement("button"); b.className = "btn pq " + (cls || ""); b.textContent = t; b.onclick = async () => { b.disabled = true; try{ const j = await fn(); if (j && j.ok === false) toast(j.erro); else { toast("Feito"); await carregar(); } }catch(e){ toast("Sem conexão"); } b.disabled = false; }; ac.appendChild(b); };
     botao(s === "bloqueado" ? "Ativar" : "Bloquear", () => api({acao: "admin_status", email: l.email, status: s === "bloqueado" ? "ativo" : "bloqueado"}), s === "bloqueado" ? "" : "perigo");
     botao("+30 dias", () => api({acao: "admin_validade", email: l.email, dias: 30}));
     if (l.validoAte) botao("Tornar vitalícia", () => api({acao: "admin_validade", email: l.email, dias: 0}));
-    if (l.aparelhos) botao("Liberar aparelhos", () => api({acao: "admin_liberar", email: l.email}));
-    botao("Reenviar e-mail", () => api({acao: "admin_reenviar", email: l.email}));
-    const nb = document.createElement("button"); nb.className = "btn pq perigo"; nb.textContent = "Gerar novo código";
+    if (l.aparelhos) botao("Liberar", () => api({acao: "admin_liberar", email: l.email}));
+    botao("Reenviar", () => api({acao: "admin_reenviar", email: l.email}));
+    const nb = document.createElement("button"); nb.className = "btn pq perigo"; nb.textContent = "Novo código";
     nb.onclick = async () => {
-      if (!nb.dataset.ok){ nb.dataset.ok = "1"; nb.textContent = "Toque de novo: troca o código, libera os aparelhos e manda por e-mail"; setTimeout(() => { delete nb.dataset.ok; nb.textContent = "Gerar novo código"; }, 5000); return; }
+      if (!nb.dataset.ok){ nb.dataset.ok = "1"; nb.textContent = "Toque de novo p/ confirmar"; setTimeout(() => { delete nb.dataset.ok; nb.textContent = "Novo código"; }, 5000); return; }
       nb.disabled = true;
       try{ const j = await api({acao: "admin_novo_codigo", email: l.email, enviar: "1"}); if (j.ok){ toast("Novo código: " + j.codigo + " (enviado por e-mail)"); await carregar(); } else toast(j.erro); }catch(e){ toast("Sem conexão"); }
       nb.disabled = false;
     };
     ac.appendChild(nb);
-    c.append(col1, col2, col3, ac); $("lista").appendChild(c);
+    c.append(cab, info, ac); $("lista").appendChild(c);
   });
 }
 $("busca").oninput = desenhar;
+$("abrirNova").onclick = () => { $("dlgNova").showModal(); $("nNome").focus(); };
+$("fecharNova").onclick = () => $("dlgNova").close();
 $("criar").onclick = async () => {
   const email = $("nEmail").value.trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ toast("Digite um e-mail válido"); return; }
   $("criar").disabled = true;
   try{ const j = await api({acao: "admin_criar", email, nome: $("nNome").value.trim(), dias: $("nPlano").value, enviar: $("nEnviar").checked ? "1" : "0"});
-    if (j.ok){ toast("Licença criada: " + j.codigo); $("nEmail").value = ""; $("nNome").value = ""; await carregar(); } else toast(j.erro); }
+    if (j.ok){ toast("Licença criada: " + j.codigo); $("nEmail").value = ""; $("nNome").value = ""; $("dlgNova").close(); await carregar(); } else toast(j.erro); }
   catch(e){ toast("Sem conexão"); }
   $("criar").disabled = false;
 };
