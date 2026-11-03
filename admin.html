@@ -30,9 +30,15 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .btn:disabled{opacity:.5}
 .erro{color:var(--vermelho);min-height:1.2em;margin-top:10px}
 .nota{color:var(--muted);font-size:.9rem}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}
-.stat b{display:block;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:2rem}
-.stat span{color:var(--muted);font-size:.85rem}
+.stats{margin-bottom:18px}
+.resumo-total{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.resumo-total b{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:2.6rem;line-height:1}
+.resumo-total span{color:var(--muted)}
+.resumo-linha{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.resumo-linha span{background:var(--fundo);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:.9rem}
+.resumo-linha span b{margin-right:4px}
+.resumo-linha .alerta{border-color:var(--ouro);color:var(--ouro)}
+.carregando{color:var(--muted);font-size:.9rem;margin:0 0 10px}
 .barra{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0}
 .barra input{flex:1;min-width:200px}
 .filtros{display:flex;gap:6px;flex-wrap:wrap}
@@ -74,9 +80,10 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 
   <section id="telaPainel" hidden>
     <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px"><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
-    <div class="stats" id="stats"></div>
-    <div class="card">
-      <h2 style="font-size:1.2rem">Nova licença</h2>
+    <p class="carregando" id="carregando" hidden>Atualizando…</p>
+    <div class="stats card" id="stats"></div>
+    <details class="card nova-box">
+      <summary style="font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:1.1rem;cursor:pointer">+ Nova licença</summary>
       <div class="nova">
         <div><label for="nEmail">E-mail</label><input id="nEmail" type="email" placeholder="cliente@email.com"></div>
         <div><label for="nNome">Nome</label><input id="nNome" type="text" placeholder="Cortesia, testador..."></div>
@@ -84,7 +91,7 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
         <button class="btn ouro" id="criar">Criar</button>
       </div>
       <label class="check"><input type="checkbox" id="nEnviar" checked> Mandar o e-mail com o código para a pessoa</label>
-    </div>
+    </details>
     <div class="barra">
       <input id="busca" type="search" placeholder="Buscar por e-mail ou nome">
       <div class="filtros" id="filtros"></div>
@@ -106,7 +113,12 @@ async function api(params){
   if (j.sair){ esquecer(); mostrar(); }
   return j;
 }
-function mostrar(){ $("telaLogin").hidden = !!token; $("telaPainel").hidden = !token; if (token) carregar(); }
+function mostrar(){
+  $("telaLogin").hidden = !!token; $("telaPainel").hidden = !token;
+  if (!token) return;
+  try{ const c = JSON.parse(localStorage.getItem("ff_admin_cache") || "null"); if (Array.isArray(c) && !dados.length){ dados = c; desenhar(); } }catch(_){}
+  carregar();
+}
 $("pedir").onclick = async () => {
   $("lErro").textContent = ""; $("pedir").disabled = true;
   try{ const j = await api({acao: "admin_pedir", email: $("lEmail").value.trim().toLowerCase()});
@@ -122,7 +134,7 @@ $("entrar").onclick = async () => {
   catch(e){ $("lErro").textContent = "Sem conexão. Tente de novo."; }
 };
 $("lCodigo").onkeydown = e => { if (e.key === "Enter") $("entrar").click(); };
-$("sair").onclick = async () => { try{ await api({acao: "admin_sair"}); }catch(_){} esquecer(); mostrar(); };
+$("sair").onclick = async () => { try{ await api({acao: "admin_sair"}); }catch(_){} esquecer(); try{ localStorage.removeItem("ff_admin_cache"); }catch(_){} mostrar(); };
 $("atualizar").onclick = () => carregar();
 function situacao(l){
   if (String(l.status).toLowerCase() !== "ativo") return "bloqueado";
@@ -131,16 +143,20 @@ function situacao(l){
 }
 const dataBR = t => t ? new Date(t).toLocaleDateString("pt-BR") : "";
 async function carregar(){
-  try{ const j = await api({acao: "admin_listar"}); if (!j.ok){ toast(j.erro || "Erro ao carregar"); return; } dados = j.licencas; desenhar(); }
+  $("carregando").hidden = false;
+  try{ const j = await api({acao: "admin_listar"}); if (!j.ok){ toast(j.erro || "Erro ao carregar"); return; } dados = j.licencas; try{ localStorage.setItem("ff_admin_cache", JSON.stringify(dados)); }catch(_){} desenhar(); }
   catch(e){ toast("Sem conexão com a planilha"); }
+  finally{ $("carregando").hidden = true; }
 }
 const FILTROS = [["todas", "Todas"], ["ativo", "Ativas"], ["vencendo", "Vencendo em 7 dias"], ["vencida", "Vencidas"], ["bloqueado", "Bloqueadas"]];
 function desenhar(){
   const ativos = dados.filter(l => situacao(l) === "ativo");
   const vencendo = ativos.filter(l => l.validoAte && l.validoAte - Date.now() < 7 * DIA);
-  $("stats").innerHTML = "";
-  [["Licenças", dados.length], ["Ativas", ativos.length], ["Vitalícias", ativos.filter(l => !l.validoAte).length], ["Mensais", ativos.filter(l => l.validoAte).length], ["Vencendo em 7 dias", vencendo.length], ["Bloqueadas", dados.filter(l => situacao(l) === "bloqueado").length]]
-    .forEach(([n, v]) => { const d = document.createElement("div"); d.className = "card stat"; d.innerHTML = "<b></b><span></span>"; d.children[0].textContent = v; d.children[1].textContent = n; $("stats").appendChild(d); });
+  $("stats").innerHTML = '<div class="resumo-total"><b></b><span>licenças no total</span></div><div class="resumo-linha"></div>';
+  $("stats").querySelector("b").textContent = dados.length;
+  const linha = $("stats").querySelector(".resumo-linha");
+  [["ativas", ativos.length], ["vitalícias", ativos.filter(l => !l.validoAte).length], ["assinaturas", ativos.filter(l => l.validoAte).length], ["vencendo em 7 dias", vencendo.length, vencendo.length > 0], ["bloqueadas", dados.filter(l => situacao(l) === "bloqueado").length]]
+    .forEach(([n, v, alerta]) => { const sp = document.createElement("span"); if (alerta) sp.className = "alerta"; const b = document.createElement("b"); b.textContent = v; sp.append(b, n); linha.appendChild(sp); });
   $("filtros").innerHTML = "";
   FILTROS.forEach(([id, nome]) => { const b = document.createElement("button"); b.className = "btn pq"; b.textContent = nome; b.setAttribute("aria-pressed", String(filtro === id)); b.onclick = () => { filtro = id; desenhar(); }; $("filtros").appendChild(b); });
   const q = $("busca").value.trim().toLowerCase();
