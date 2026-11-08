@@ -181,11 +181,11 @@ function desenhar(){
     const cab = document.createElement("div"); cab.className = "cab";
     cab.innerHTML = '<div><div class="nm"></div><div class="em"></div></div><span class="tag ' + s + '"></span>';
     cab.querySelector(".nm").textContent = l.nome || l.email;
-    if (l.pro){ const pr = document.createElement("span"); pr.className = "tag pro"; pr.textContent = "PRO"; cab.querySelector(".nm").append(" ", pr); }
+    if (l.pro){ const pr = document.createElement("span"); pr.className = "tag pro"; pr.textContent = l.cortesia ? "PRO cortesia" : "PRO"; cab.querySelector(".nm").append(" ", pr); }
     cab.querySelector(".em").textContent = (l.nome ? l.email + " · " : "") + "código " + l.codigo;
     cab.querySelector(".tag").textContent = s === "ativo" ? "Ativa" : s === "vencida" ? "Vencida" : "Bloqueada";
     const info = document.createElement("div"); info.className = "info";
-    const datas = document.createElement("span"); datas.textContent = "Desde " + dataBR(l.data) + " · " + (l.validoAte ? "válida até " + dataBR(l.validoAte) : "vitalícia");
+    const datas = document.createElement("span"); datas.textContent = "Desde " + dataBR(l.data) + " · " + (l.validoAte ? "válida até " + dataBR(l.validoAte) : "vitalícia") + (l.proTipo && l.proAte ? " · " + l.proTipo + " até " + dataBR(l.proAte) : "") + (l.cancelado ? " · cancelou: " + l.cancelado : "");
     const ap = Number(l.aparelhos) || 0, aps = document.createElement("span"); aps.className = "aps" + (ap >= 2 ? " cheio" : ""); aps.title = ap + " de 2 aparelhos em uso";
     aps.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>';
     aps.append(ap + "/2");
@@ -194,7 +194,8 @@ function desenhar(){
     const botao = (t, fn, cls) => { const b = document.createElement("button"); b.className = "btn pq " + (cls || ""); b.textContent = t; b.onclick = async () => { b.disabled = true; try{ const j = await fn(); if (j && j.ok === false) toast(j.erro); else { toast("Feito"); await carregar(); } }catch(e){ toast("Sem conexão"); } b.disabled = false; }; ac.appendChild(b); };
     botao(s === "bloqueado" ? "Ativar" : "Bloquear", () => api({acao: "admin_status", email: l.email, status: s === "bloqueado" ? "ativo" : "bloqueado"}), s === "bloqueado" ? "" : "perigo");
     botao("+30 dias", () => api({acao: "admin_validade", email: l.email, dias: 30}));
-    botao(l.pro ? "Tirar Pro" : "Ativar Pro", () => api({acao: "admin_pro", email: l.email, pro: l.pro ? "0" : "1"}), l.pro ? "" : "ouro-l");
+    /* v16: este botão mexe só na CORTESIA (o Pro pago vem da Kiwify e vence sozinho) */
+    botao(l.cortesia ? "Tirar cortesia" : "Dar Pro cortesia", () => api({acao: "admin_pro", email: l.email, pro: l.cortesia ? "0" : "1"}), l.cortesia ? "" : "ouro-l");
     if (l.validoAte) botao("Tornar vitalícia", () => api({acao: "admin_validade", email: l.email, dias: 0}));
     if (l.aparelhos) botao("Liberar", () => api({acao: "admin_liberar", email: l.email}));
     botao("Reenviar", () => api({acao: "admin_reenviar", email: l.email}));
