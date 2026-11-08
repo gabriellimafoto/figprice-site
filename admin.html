@@ -54,6 +54,10 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .aps svg{width:14px;height:14px}
 .aps.cheio{color:var(--ouro)}
 .tag{display:inline-block;font-size:.75rem;font-weight:800;padding:3px 9px;border-radius:20px;background:#3a2a20;color:var(--muted)}
+.hist{margin-top:10px;border-top:1px solid #4a382b;padding-top:8px;font-size:.85rem}
+.hist-l{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:6px 0;border-bottom:1px dashed #3a2a20}
+.hist-l span{color:#bfae99;grid-row:span 2}
+.hist-l small{color:#bfae99}
 .tag.pro{background:var(--ouro);color:#2a2420;vertical-align:2px}
 .btn.ouro-l{color:var(--ouro);border-color:var(--ouro)}
 .tag.ativo{background:#1f4a43;color:#bfeee5}.tag.bloqueado{background:#5a1f19;color:#ffc9c2}.tag.vencida{background:#5a4513;color:#f3d48b}
@@ -207,7 +211,25 @@ function desenhar(){
       nb.disabled = false;
     };
     ac.appendChild(nb);
-    c.append(cab, info, ac); $("lista").appendChild(c);
+    /* v17: histórico da conta (tudo que aconteceu com a assinatura, do mais novo para o mais velho) */
+    const hb = document.createElement("button"); hb.className = "btn pq"; hb.textContent = "Histórico";
+    const hl = document.createElement("div"); hl.className = "hist"; hl.hidden = true;
+    hb.onclick = async () => {
+      if (!hl.hidden){ hl.hidden = true; return; }
+      hb.disabled = true; hl.hidden = false; hl.textContent = "Carregando…";
+      try{ const j = await api({acao: "admin_historico", email: l.email});
+        hl.textContent = "";
+        if (!j.ok){ hl.textContent = j.erro || "Não deu para carregar."; }
+        else if (!j.historico.length){ hl.textContent = "Nada registrado ainda (o histórico começou na versão 17 do script)."; }
+        else j.historico.forEach(h => { const r = document.createElement("div"); r.className = "hist-l";
+          const d = document.createElement("span"); d.textContent = h.data ? new Date(h.data).toLocaleString("pt-BR", {dateStyle: "short", timeStyle: "short"}) : "";
+          const e = document.createElement("b"); e.textContent = h.evento;
+          const x = document.createElement("small"); x.textContent = [h.detalhe, h.valor ? "valor " + h.valor : "", h.pedido ? "pedido " + h.pedido : ""].filter(Boolean).join(" · ");
+          r.append(d, e, x); hl.appendChild(r); });
+      }catch(_){ hl.textContent = "Sem conexão."; }
+      hb.disabled = false; };
+    ac.appendChild(hb);
+    c.append(cab, info, ac, hl); $("lista").appendChild(c);
   });
 }
 $("busca").oninput = desenhar;

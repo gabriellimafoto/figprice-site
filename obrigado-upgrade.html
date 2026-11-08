@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Pro liberado · FigPrice</title>
+<meta name="theme-color" content="#1a120d">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:#1a120d;color:#f1e9dd;font-family:"Figtree",system-ui,sans-serif;font-size:17px;line-height:1.55;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+main{width:min(620px,100% - 32px);margin:0 auto;padding:40px 0 70px}
+.marca{display:inline-flex;align-items:center;gap:10px;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.4rem;color:#f1e9dd;text-decoration:none}
+.marca img{width:34px;height:34px;border-radius:8px}
+h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:clamp(2.2rem,8vw,3.2rem);letter-spacing:-.03em;line-height:1.05;margin:28px 0 10px}
+.sub{color:#bfae99;margin:0 0 28px}
+ol{list-style:none;padding:0;margin:0;display:grid;gap:12px;counter-reset:p}
+li{background:#241912;border:1px solid #4a382b;border-radius:18px;padding:18px 18px 18px 64px;position:relative}
+li::before{counter-increment:p;content:counter(p);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;background:#e2b54a;color:#2a2420;font-weight:800;display:grid;place-items:center}
+li b{display:block;font-size:1.08rem;margin-bottom:4px}
+li p{margin:0;color:#d8ccbb}
+.alerta{border-color:#6cc0b2}
+.alerta::before{background:#6cc0b2;color:#11201e}
+.pastas{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pastas span{font-size:.85rem;font-weight:700;padding:5px 11px;border-radius:999px;background:#130c08;border:1px solid #4a382b}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;margin-top:22px;border-radius:14px;background:#e2b54a;color:#2a2420;font-weight:800;font-size:1.05rem;text-decoration:none}
+.btn.sec{background:transparent;color:#f1e9dd;border:1px solid #4a382b;margin-top:10px;font-weight:700}
+.nota{color:#bfae99;font-size:.92rem;margin-top:26px;text-align:center}
+.nota a{color:#e2b54a}
+</style>
+</head>
+<body>
+<main>
+  <a class="marca" href="/"><img src="icon-192.png" alt="">FigPrice</a>
+  <h1>Seu Pro chegou!</h1>
+  <p class="sub">Obrigado por confiar no FigPrice. Você não precisa de código novo: o Pro entra na conta que você já usa.</p>
+  <ol>
+    <li><b>Abra o FigPrice</b><p>No mesmo celular ou computador de sempre. Em instantes o Pro libera sozinho.</p></li>
+    <li><b>Não liberou?</b><p>Vá em <b style="display:inline;font-size:inherit">Configurações &gt; Seu plano</b> e toque em <b style="display:inline;font-size:inherit">Já paguei: conferir agora</b>. Use a internet nessa hora.</p></li>
+    <li class="alerta"><b>Veio do plano anual básico?</b><p>Cancele a renovação do básico na Kiwify, para não pagar os dois no ano que vem. O Pro anual já cobre tudo.</p></li>
+  </ol>
+  <div class="pastas" style="margin-top:20px"><span>Clientes</span><span>Pagamentos</span><span>Catálogo</span><span>Fila de peças</span><span>Painel</span></div>
+  <a class="btn" href="/app">Abrir o FigPrice</a>
+  <p class="nota">Pagou com outro e-mail, diferente do da sua licença? Fale com a gente pelo e-mail <a href="mailto:contato@figprice.com.br">contato@figprice.com.br</a> que a gente junta tudo.</p>
+</main>
+</body>
+</html>
