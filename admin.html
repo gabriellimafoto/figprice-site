@@ -59,6 +59,19 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .hist-l span{color:#bfae99;grid-row:span 2}
 .hist-l small{color:#bfae99}
 .tag.pro{background:var(--ouro);color:#2a2420;vertical-align:2px}
+.tag.basico{background:#4a4540;color:#d8d2ca;vertical-align:2px}
+.resumo-total{cursor:pointer;border-radius:12px;padding:2px 6px;margin:-2px -6px}
+.resumo-total[aria-pressed="true"] span{color:var(--verde)}
+.resumo-linha button{background:var(--fundo);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font:inherit;font-size:.9rem;color:var(--ink);cursor:pointer;transition:background .2s,border-color .2s}
+.resumo-linha button b{margin-right:4px}
+.resumo-linha button.alerta{border-color:var(--ouro);color:var(--ouro)}
+.resumo-linha button[aria-pressed="true"]{background:var(--verde);border-color:var(--verde);color:#11201e}
+.resumo-linha button:disabled{opacity:.45;cursor:default}
+.lic{position:relative;padding-bottom:22px}
+.seta-hist{position:absolute;right:8px;bottom:4px;width:30px;height:24px;border:0;background:none;color:var(--muted);cursor:pointer;display:grid;place-items:center;border-radius:8px}
+.seta-hist svg{width:18px;height:18px;transition:transform .25s}
+.seta-hist[aria-expanded="true"] svg{transform:rotate(180deg)}
+.seta-hist:hover{background:var(--fundo)}
 .btn.ouro-l{color:var(--ouro);border-color:var(--ouro)}
 .tag.ativo{background:#1f4a43;color:#bfeee5}.tag.bloqueado{background:#5a1f19;color:#ffc9c2}.tag.vencida{background:#5a4513;color:#f3d48b}.tag.reembolsada{background:#2a3550;color:#c3d3ff}.tag.contestada{background:#4a1f3f;color:#ffc2ec}
 .lic{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .12s,border-color .2s}
@@ -146,7 +159,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
     <dialog id="dlgReemb"></dialog>
     <div class="barra">
       <input id="busca" type="search" placeholder="Buscar por e-mail ou nome">
-      <div class="filtros" id="filtros"></div>
+
     </div>
     <div class="lista" id="lista"></div>
   </section>
@@ -204,21 +217,37 @@ async function carregar(){
   finally{ $("carregando").hidden = true; $("lista").classList.remove("velha"); carregarReemb(); }
 }
 const FILTROS = [["todas", "Todas"], ["ativo", "Ativas"], ["vencendo", "Vencendo em 7 dias"], ["vencida", "Vencidas"], ["bloqueado", "Bloqueadas"]];
+let FILTRO_FN = null;
 function desenhar(){
   const ativos = dados.filter(l => situacao(l) === "ativo");
   const vencendo = ativos.filter(l => l.validoAte && l.validoAte - Date.now() < 7 * DIA);
-  $("stats").innerHTML = '<div class="resumo-total"><b></b><span>licenças no total</span></div><div class="resumo-linha"></div>';
-  $("stats").querySelector("b").textContent = dados.length;
+  /* (09/11) os números do topo SÃO os filtros: tocar filtra a lista; tocar de novo volta para todas */
+  const F = {
+    ativo: l => situacao(l) === "ativo",
+    pro: l => !!l.pro && situacao(l) === "ativo",
+    basico: l => !l.pro && situacao(l) === "ativo",
+    vitalicia: l => situacao(l) === "ativo" && !l.validoAte,
+    assinatura: l => situacao(l) === "ativo" && !!l.validoAte,
+    vencendo: l => situacao(l) === "ativo" && l.validoAte && l.validoAte - Date.now() < 7 * DIA,
+    vencida: l => situacao(l) === "vencida",
+    bloqueado: l => situacao(l) === "bloqueado",
+    reembolsada: l => situacao(l) === "reembolsada" || situacao(l) === "contestada"
+  };
+  FILTRO_FN = F[filtro] || null;
+  $("stats").innerHTML = '<div class="resumo-total" role="button" tabindex="0"><b></b><span>licenças no total</span></div><div class="resumo-linha"></div>';
+  const tot = $("stats").querySelector(".resumo-total"); tot.querySelector("b").textContent = dados.length; tot.setAttribute("aria-pressed", String(filtro === "todas"));
+  tot.onclick = () => { filtro = "todas"; desenhar(); };
   const linha = $("stats").querySelector(".resumo-linha");
-  [["ativas", ativos.length], ["Pro", dados.filter(l => l.pro).length], ["vitalícias", ativos.filter(l => !l.validoAte).length], ["assinaturas", ativos.filter(l => l.validoAte).length], ["vencendo em 7 dias", vencendo.length, vencendo.length > 0], ["bloqueadas", dados.filter(l => situacao(l) === "bloqueado").length], ["reembolsadas", dados.filter(l => situacao(l) === "reembolsada").length]]
-    .forEach(([n, v, alerta]) => { const sp = document.createElement("span"); if (alerta) sp.className = "alerta"; const b = document.createElement("b"); b.textContent = v; sp.append(b, n); linha.appendChild(sp); });
-  $("filtros").innerHTML = "";
-  FILTROS.forEach(([id, nome]) => { const b = document.createElement("button"); b.className = "btn pq"; b.textContent = nome; b.setAttribute("aria-pressed", String(filtro === id)); b.onclick = () => { filtro = id; desenhar(); }; $("filtros").appendChild(b); });
+  [["ativo", "ativas"], ["pro", "Pro"], ["basico", "básico"], ["vitalicia", "vitalícias"], ["assinatura", "assinaturas"], ["vencendo", "vencendo em 7 dias", true], ["vencida", "vencidas"], ["bloqueado", "bloqueadas"], ["reembolsada", "reembolsadas"]]
+    .forEach(([id, nome, alerta]) => { const n = dados.filter(F[id]).length; if (!n && filtro !== id && (id === "vencida" || id === "reembolsada")) return;
+      const b = document.createElement("button"); b.type = "button"; if (alerta && n) b.className = "alerta"; b.disabled = !n && filtro !== id;
+      b.setAttribute("aria-pressed", String(filtro === id)); const bb = document.createElement("b"); bb.textContent = n; b.append(bb, nome);
+      b.onclick = () => { filtro = filtro === id ? "todas" : id; desenhar(); }; linha.appendChild(b); });
+
   const q = $("busca").value.trim().toLowerCase();
   const lista = dados.filter(l => {
     const s = situacao(l);
-    if (filtro === "vencendo" && !(s === "ativo" && l.validoAte && l.validoAte - Date.now() < 7 * DIA)) return false;
-    if (filtro !== "todas" && filtro !== "vencendo" && s !== filtro && !(filtro === "bloqueado" && (s === "reembolsada" || s === "contestada"))) return false;
+    if (FILTRO_FN && !FILTRO_FN(l)) return false;
     return !q || String(l.email).toLowerCase().includes(q) || String(l.nome).toLowerCase().includes(q);
   }).sort((a, b) => (b.data || 0) - (a.data || 0));
   $("lista").innerHTML = "";
@@ -228,7 +257,7 @@ function desenhar(){
     const cab = document.createElement("div"); cab.className = "cab";
     cab.innerHTML = '<div><div class="nm"></div><div class="em"></div></div><span class="tag ' + s + '"></span>';
     cab.querySelector(".nm").textContent = l.nome || l.email;
-    if (l.pro){ const pr = document.createElement("span"); pr.className = "tag pro"; pr.textContent = l.cortesia ? "PRO cortesia" : "PRO"; cab.querySelector(".nm").append(" ", pr); }
+    { const pr = document.createElement("span"); pr.className = "tag " + (l.pro ? "pro" : "basico"); pr.textContent = l.pro ? (l.cortesia ? "PRO cortesia" : l.proTipo === "teste" ? "PRO teste" : "PRO") : "BÁSICO"; cab.querySelector(".nm").append(" ", pr); }
     cab.querySelector(".em").textContent = (l.nome ? l.email + " · " : "") + "código " + l.codigo;
     cab.querySelector(":scope > .tag").textContent = ({ativo: "Ativa", vencida: "Vencida", reembolsada: "Reembolsada", contestada: "Contestada"})[s] || "Bloqueada";
     const info = document.createElement("div"); info.className = "info";
@@ -251,7 +280,11 @@ function desenhar(){
     ["pointerup", "pointerleave", "pointercancel"].forEach(ev => c.addEventListener(ev, soltar));
     c.addEventListener("contextmenu", e => e.preventDefault());
     c.addEventListener("click", e => { if (segurou){ segurou = false; return; } if (e.target.closest(".hist")) return; menuLic(l, hl, false); });
-    c.append(cab, info); if (c.__teste) c.append(c.__teste); c.append(hl); $("lista").appendChild(c);
+    const seta = document.createElement("button"); seta.type = "button"; seta.className = "seta-hist"; seta.setAttribute("aria-label", "Ver histórico"); seta.setAttribute("aria-expanded", "false");
+    seta.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    seta.addEventListener("pointerdown", e => e.stopPropagation());
+    seta.onclick = e => { e.stopPropagation(); const abrir = hl.hidden; seta.setAttribute("aria-expanded", String(abrir)); if (abrir) verHistorico(l, hl); else hl.hidden = true; };
+    c.append(cab, info); if (c.__teste) c.append(c.__teste); c.append(hl, seta); $("lista").appendChild(c);
   });
 }
 const ICO = {
@@ -303,8 +336,6 @@ function menuLic(l, hl, excluir){
       const sim = document.createElement("button"); sim.className = "btn ouro"; sim.textContent = "Gerar e enviar";
       sim.onclick = async () => { fechar(); try{ const j = await api({acao: "admin_novo_codigo", email: l.email, enviar: "1"}); if (j.ok){ toast("Novo código: " + j.codigo + " (enviado)"); await carregar(); } else toast(j.erro); }catch(_){ toast("Sem conexão"); } };
       cf.querySelector(".btns").append(nao, sim); d.replaceChildren(topo, cf); })),
-    div("Conta"), grupo(
-    item("hist", "Ver histórico", "tudo que aconteceu com a assinatura", () => { fechar(); verHistorico(l, hl); })),
     Object.assign(document.createElement("div"), {className: "ac-sep"}),
     item("lixo", "Excluir licença", "dá para recuperar na aba Excluidas", confirmarExcluir, "perigo"));
   d.replaceChildren(topo, corpo);
