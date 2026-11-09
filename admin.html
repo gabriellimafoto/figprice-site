@@ -61,6 +61,44 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .tag.pro{background:var(--ouro);color:#2a2420;vertical-align:2px}
 .btn.ouro-l{color:var(--ouro);border-color:var(--ouro)}
 .tag.ativo{background:#1f4a43;color:#bfeee5}.tag.bloqueado{background:#5a1f19;color:#ffc9c2}.tag.vencida{background:#5a4513;color:#f3d48b}
+.lic{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .12s,border-color .2s}
+.lic:active{transform:scale(.99)}
+.lic.segurando{border-color:var(--vermelho);transition:border-color .5s}
+.lic .mais{color:var(--muted);font-size:1.3rem;line-height:1;margin-left:4px}
+.lista.velha{opacity:.45;pointer-events:none;filter:grayscale(.4);transition:opacity .2s}
+.carregando{position:sticky;top:8px;z-index:5;display:flex;align-items:center;gap:8px;width:max-content;margin:0 auto 10px;padding:7px 14px;border-radius:20px;background:var(--card);border:1px solid var(--ouro);color:var(--ouro);font-weight:700;font-size:.88rem}
+.carregando::before{content:"";width:12px;height:12px;border-radius:50%;border:2px solid var(--ouro);border-top-color:transparent;animation:gira .8s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+#dlgAcoes{padding:0;overflow:hidden}
+.ac-topo{padding:18px 20px 10px;border-bottom:1px solid var(--line)}
+.ac-topo b{display:block;font-size:1.05rem}.ac-topo small{color:var(--muted);word-break:break-all}
+.ac-corpo{padding:6px 12px 14px;max-height:70vh;overflow:auto}
+.ac-div{display:flex;align-items:center;gap:10px;margin:16px 6px 6px;color:var(--ouro);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.ac-div::after{content:"";flex:1;height:1px;background:var(--line)}
+.ac-div:first-child{margin-top:8px}
+.ac-grupo{background:var(--fundo);border:1px solid var(--line);border-radius:14px;padding:2px}
+.teste-l{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:var(--verde)}
+.teste-l.fim{color:var(--muted)}
+#abrirReemb{position:relative}
+#abrirReemb .n{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--vermelho);color:#fff;font-size:.72rem;font-weight:800;display:grid;place-items:center}
+.re-item{border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;background:var(--fundo)}
+.re-item b{display:block}.re-item small{color:var(--muted);display:block}
+.re-item .re-mot{margin:8px 0 0;font-size:.88rem}
+.re-item .btns{display:flex;gap:8px;margin-top:10px}.re-item .btns .btn{flex:1}
+.re-st{display:inline-block;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-left:6px;vertical-align:2px}
+.re-st.pendente{background:var(--ouro);color:#2a2420}.re-st.devolvido{background:var(--verde);color:#11201e}.re-st.recusado{background:#3a2a20;color:var(--muted)}
+.re-prazo{color:var(--vermelho);font-weight:700}
+.ac-item{display:flex;align-items:center;gap:12px;width:100%;padding:12px 10px;border:0;border-radius:12px;background:none;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.ac-item:hover,.ac-item:active{background:var(--fundo)}
+.ac-item svg{width:20px;height:20px;flex:none;color:var(--muted)}
+.ac-item span{flex:1}.ac-item small{color:var(--muted);font-size:.8rem}
+.ac-item.ouro svg,.ac-item.ouro span{color:var(--ouro)}
+.ac-item.perigo,.ac-item.perigo svg{color:var(--vermelho)}
+.ac-sep{border-top:1px solid var(--line);margin:12px 0 4px}
+.ac-conf{padding:18px 20px}
+.ac-conf p{margin:6px 0 16px;color:var(--muted)}
+.ac-conf .btns{display:flex;gap:8px}.ac-conf .btns .btn{flex:1}
+.btn.vermelho{background:var(--vermelho);border-color:var(--vermelho);color:#fff}
 .acoes{display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--line);padding-top:10px}
 .acoes .btn.pq{min-height:30px;padding:4px 10px;font-size:.8rem}
 dialog{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:22px;width:min(440px,100% - 32px)}
@@ -93,7 +131,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
   </section>
 
   <section id="telaPainel" hidden>
-    <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ouro" id="abrirNova">+ Nova licença</button><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
+    <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ouro" id="abrirNova">+ Nova licença</button><button class="btn" id="abrirReemb">Reembolsos</button><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
     <p class="carregando" id="carregando" hidden>Atualizando…</p>
     <div class="stats card" id="stats"></div>
     <dialog id="dlgNova">
@@ -104,6 +142,8 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
       <label class="check"><input type="checkbox" id="nEnviar" checked> Mandar o e-mail com o código para a pessoa</label>
       <button class="btn ouro" style="width:100%;margin-top:16px" id="criar">Criar licença</button>
     </dialog>
+    <dialog id="dlgAcoes"></dialog>
+    <dialog id="dlgReemb"></dialog>
     <div class="barra">
       <input id="busca" type="search" placeholder="Buscar por e-mail ou nome">
       <div class="filtros" id="filtros"></div>
@@ -155,10 +195,10 @@ function situacao(l){
 }
 const dataBR = t => t ? new Date(t).toLocaleDateString("pt-BR") : "";
 async function carregar(){
-  $("carregando").hidden = false;
+  $("carregando").hidden = false; if (dados.length) $("lista").classList.add("velha");
   try{ const j = await api({acao: "admin_listar"}); if (!j.ok){ toast(j.erro || "Erro ao carregar"); return; } dados = j.licencas; try{ localStorage.setItem("ff_admin_cache", JSON.stringify(dados)); }catch(_){} desenhar(); }
   catch(e){ toast("Sem conexão com a planilha"); }
-  finally{ $("carregando").hidden = true; }
+  finally{ $("carregando").hidden = true; $("lista").classList.remove("velha"); carregarReemb(); }
 }
 const FILTROS = [["todas", "Todas"], ["ativo", "Ativas"], ["vencendo", "Vencendo em 7 dias"], ["vencida", "Vencidas"], ["bloqueado", "Bloqueadas"]];
 function desenhar(){
@@ -187,51 +227,145 @@ function desenhar(){
     cab.querySelector(".nm").textContent = l.nome || l.email;
     if (l.pro){ const pr = document.createElement("span"); pr.className = "tag pro"; pr.textContent = l.cortesia ? "PRO cortesia" : "PRO"; cab.querySelector(".nm").append(" ", pr); }
     cab.querySelector(".em").textContent = (l.nome ? l.email + " · " : "") + "código " + l.codigo;
-    cab.querySelector(".tag").textContent = s === "ativo" ? "Ativa" : s === "vencida" ? "Vencida" : "Bloqueada";
+    cab.querySelector(":scope > .tag").textContent = s === "ativo" ? "Ativa" : s === "vencida" ? "Vencida" : "Bloqueada";
     const info = document.createElement("div"); info.className = "info";
     const datas = document.createElement("span"); datas.textContent = "Desde " + dataBR(l.data) + " · " + (l.validoAte ? "válida até " + dataBR(l.validoAte) : "vitalícia") + (l.proTipo && l.proAte ? " · " + l.proTipo + " até " + dataBR(l.proAte) : "") + (l.cancelado ? " · cancelou: " + l.cancelado : "");
     const ap = Number(l.aparelhos) || 0, aps = document.createElement("span"); aps.className = "aps" + (ap >= 2 ? " cheio" : ""); aps.title = ap + " de 2 aparelhos em uso";
     aps.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>';
     aps.append(ap + "/2");
     info.append(datas, aps);
-    const ac = document.createElement("div"); ac.className = "acoes";
-    const botao = (t, fn, cls) => { const b = document.createElement("button"); b.className = "btn pq " + (cls || ""); b.textContent = t; b.onclick = async () => { b.disabled = true; try{ const j = await fn(); if (j && j.ok === false) toast(j.erro); else { toast("Feito"); await carregar(); } }catch(e){ toast("Sem conexão"); } b.disabled = false; }; ac.appendChild(b); };
-    botao(s === "bloqueado" ? "Ativar" : "Bloquear", () => api({acao: "admin_status", email: l.email, status: s === "bloqueado" ? "ativo" : "bloqueado"}), s === "bloqueado" ? "" : "perigo");
-    botao("+30 dias", () => api({acao: "admin_validade", email: l.email, dias: 30}));
-    /* v16: este botão mexe só na CORTESIA (o Pro pago vem da Cakto/Kiwify e vence sozinho) */
-    botao(l.cortesia ? "Tirar cortesia" : "Dar Pro cortesia", () => api({acao: "admin_pro", email: l.email, pro: l.cortesia ? "0" : "1"}), l.cortesia ? "" : "ouro-l");
-    if (l.validoAte) botao("Tornar vitalícia", () => api({acao: "admin_validade", email: l.email, dias: 0}));
-    if (l.aparelhos) botao("Liberar", () => api({acao: "admin_liberar", email: l.email}));
-    botao("Reenviar", () => api({acao: "admin_reenviar", email: l.email}));
-    const nb = document.createElement("button"); nb.className = "btn pq perigo"; nb.textContent = "Novo código";
-    nb.onclick = async () => {
-      if (!nb.dataset.ok){ nb.dataset.ok = "1"; nb.textContent = "Toque de novo p/ confirmar"; setTimeout(() => { delete nb.dataset.ok; nb.textContent = "Novo código"; }, 5000); return; }
-      nb.disabled = true;
-      try{ const j = await api({acao: "admin_novo_codigo", email: l.email, enviar: "1"}); if (j.ok){ toast("Novo código: " + j.codigo + " (enviado por e-mail)"); await carregar(); } else toast(j.erro); }catch(e){ toast("Sem conexão"); }
-      nb.disabled = false;
-    };
-    ac.appendChild(nb);
-    /* v17: histórico da conta (tudo que aconteceu com a assinatura, do mais novo para o mais velho) */
-    const hb = document.createElement("button"); hb.className = "btn pq"; hb.textContent = "Histórico";
+    if (l.teste){ const fimT = l.teste + 7 * DIA, emCurso = Date.now() < fimT && l.proTipo === "teste";
+      const t = document.createElement("div"); t.className = "teste-l" + (emCurso ? "" : " fim");
+      t.textContent = "Teste grátis do Pro: " + dataBR(l.teste) + " a " + dataBR(fimT) + (emCurso ? " · em andamento (" + Math.max(0, Math.ceil((fimT - Date.now()) / DIA)) + " dias)" : l.testeFim === "ok" ? " · acabou, ficou no básico" : /^pro|^upgrade/.test(l.proTipo) ? " · acabou e assinou o Pro" : " · acabou");
+      c.__teste = t; }
     const hl = document.createElement("div"); hl.className = "hist"; hl.hidden = true;
-    hb.onclick = async () => {
-      if (!hl.hidden){ hl.hidden = true; return; }
-      hb.disabled = true; hl.hidden = false; hl.textContent = "Carregando…";
-      try{ const j = await api({acao: "admin_historico", email: l.email});
-        hl.textContent = "";
-        if (!j.ok){ hl.textContent = j.erro || "Não deu para carregar."; }
-        else if (!j.historico.length){ hl.textContent = "Nada registrado ainda (o histórico começou na versão 17 do script)."; }
-        else j.historico.forEach(h => { const r = document.createElement("div"); r.className = "hist-l";
-          const d = document.createElement("span"); d.textContent = h.data ? new Date(h.data).toLocaleString("pt-BR", {dateStyle: "short", timeStyle: "short"}) : "";
-          const e = document.createElement("b"); e.textContent = h.evento;
-          const x = document.createElement("small"); x.textContent = [h.detalhe, h.valor ? "valor " + h.valor : "", h.pedido ? "pedido " + h.pedido : ""].filter(Boolean).join(" · ");
-          r.append(d, e, x); hl.appendChild(r); });
-      }catch(_){ hl.textContent = "Sem conexão."; }
-      hb.disabled = false; };
-    ac.appendChild(hb);
-    c.append(cab, info, ac, hl); $("lista").appendChild(c);
+    const mais = document.createElement("span"); mais.className = "mais"; mais.textContent = "⋯"; mais.setAttribute("aria-hidden", "true");
+    cab.querySelector(":scope > .tag").after(mais);
+    /* segurar 0,6 s = excluir; toque normal = menu */
+    let tSeg = null, segurou = false;
+    const soltar = () => { clearTimeout(tSeg); c.classList.remove("segurando"); };
+    c.addEventListener("pointerdown", () => { segurou = false; c.classList.add("segurando"); tSeg = setTimeout(() => { segurou = true; c.classList.remove("segurando"); if (navigator.vibrate) navigator.vibrate(30); menuLic(l, hl, true); }, 600); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => c.addEventListener(ev, soltar));
+    c.addEventListener("contextmenu", e => e.preventDefault());
+    c.addEventListener("click", e => { if (segurou){ segurou = false; return; } if (e.target.closest(".hist")) return; menuLic(l, hl, false); });
+    c.append(cab, info); if (c.__teste) c.append(c.__teste); c.append(hl); $("lista").appendChild(c);
   });
 }
+const ICO = {
+  bloq: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  ativ: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/>',
+  mais: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  infi: '<path d="M7 9a3 3 0 1 0 0 6c2.5 0 7.5-6 10-6a3 3 0 1 1 0 6c-2.5 0-7.5-6-10-6z"/>',
+  cel: '<rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/>',
+  pro: '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  cod: '<path d="M21 2l-2 2m-7.6 7.6a5 5 0 1 1-7 7 5 5 0 0 1 7-7zm0 0L15 8m0 0l3 3 3-3-3-3"/>',
+  hist: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  lixo: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
+};
+function menuLic(l, hl, excluir){
+  const d = $("dlgAcoes"), s = situacao(l);
+  const svg = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICO[k] + '</svg>';
+  const fechar = () => d.close();
+  const rodar = async (fn, ok) => { fechar(); try{ const j = await fn(); if (j && j.ok === false) toast(j.erro || "Não deu certo"); else { toast(ok); await carregar(); } }catch(_){ toast("Sem conexão"); } };
+  const item = (ico, txt, sub, fn, cls) => { const b = document.createElement("button"); b.type = "button"; b.className = "ac-item " + (cls || ""); b.innerHTML = svg(ico) + "<span></span>"; b.querySelector("span").textContent = txt; if (sub){ const sm = document.createElement("small"); sm.textContent = sub; b.querySelector("span").append(document.createElement("br"), sm); } b.onclick = fn; return b; };
+  const div = t => { const e = document.createElement("div"); e.className = "ac-div"; e.textContent = t; return e; };
+  const topo = document.createElement("div"); topo.className = "ac-topo"; topo.innerHTML = "<b></b><small></small>";
+  topo.querySelector("b").textContent = l.nome || l.email; topo.querySelector("small").textContent = l.email + " · código " + l.codigo;
+  const confirmarExcluir = () => {
+    const cf = document.createElement("div"); cf.className = "ac-conf"; cf.innerHTML = "<b>Excluir esta licença?</b><p></p><div class=\"btns\"></div>";
+    cf.querySelector("p").textContent = (l.nome || l.email) + " perde o acesso ao app. A linha vai para a aba Excluidas da planilha, então dá para recuperar se precisar.";
+    const nao = document.createElement("button"); nao.className = "btn"; nao.textContent = "Cancelar"; nao.onclick = fechar;
+    const sim = document.createElement("button"); sim.className = "btn vermelho"; sim.textContent = "Excluir";
+    sim.onclick = () => rodar(() => api({acao: "admin_excluir", email: l.email}), "Licença excluída");
+    cf.querySelector(".btns").append(nao, sim); d.replaceChildren(topo, cf);
+  };
+  if (excluir){ confirmarExcluir(); d.showModal(); return; }
+  const corpo = document.createElement("div"); corpo.className = "ac-corpo";
+  const grupo = (...xs) => { const g = document.createElement("div"); g.className = "ac-grupo"; g.append(...xs.filter(Boolean)); return g; };
+  corpo.append(
+    div("Acesso"), grupo(
+    s === "bloqueado" ? item("ativ", "Desbloquear", "volta a funcionar na hora", () => rodar(() => api({acao: "admin_status", email: l.email, status: "ativo"}), "Desbloqueada"))
+      : item("bloq", "Bloquear", "o app para de funcionar", () => rodar(() => api({acao: "admin_status", email: l.email, status: "bloqueado"}), "Bloqueada"), "perigo"),
+    item("mais", "Dar mais 30 dias", l.validoAte ? "vale até " + dataBR(l.validoAte + 30 * DIA) : "", () => rodar(() => api({acao: "admin_validade", email: l.email, dias: 30}), "+30 dias")),
+    l.validoAte ? item("infi", "Tornar vitalícia", "nunca vence", () => rodar(() => api({acao: "admin_validade", email: l.email, dias: 0}), "Agora é vitalícia")) : "",
+    Number(l.aparelhos) ? item("cel", "Liberar aparelhos", l.aparelhos + " de 2 em uso", () => rodar(() => api({acao: "admin_liberar", email: l.email}), "Aparelhos liberados")) : ""),
+    div("Pro"), grupo(
+    item("pro", l.cortesia ? "Tirar o Pro cortesia" : "Dar Pro de cortesia", l.cortesia ? "volta ao plano que pagou" : "Pro de presente, sem cobrança", () => rodar(() => api({acao: "admin_pro", email: l.email, pro: l.cortesia ? "0" : "1"}), l.cortesia ? "Cortesia retirada" : "Pro de cortesia ligado"), l.cortesia ? "" : "ouro")),
+    div("Código"), grupo(
+    item("mail", "Reenviar o código por e-mail", "", () => rodar(() => api({acao: "admin_reenviar", email: l.email}), "E-mail reenviado")),
+    item("cod", "Gerar código novo", "o antigo para de funcionar", () => {
+      const cf = document.createElement("div"); cf.className = "ac-conf"; cf.innerHTML = "<b>Gerar um código novo?</b><p>O código atual para de funcionar e a pessoa recebe o novo por e-mail.</p><div class=\"btns\"></div>";
+      const nao = document.createElement("button"); nao.className = "btn"; nao.textContent = "Cancelar"; nao.onclick = fechar;
+      const sim = document.createElement("button"); sim.className = "btn ouro"; sim.textContent = "Gerar e enviar";
+      sim.onclick = async () => { fechar(); try{ const j = await api({acao: "admin_novo_codigo", email: l.email, enviar: "1"}); if (j.ok){ toast("Novo código: " + j.codigo + " (enviado)"); await carregar(); } else toast(j.erro); }catch(_){ toast("Sem conexão"); } };
+      cf.querySelector(".btns").append(nao, sim); d.replaceChildren(topo, cf); })),
+    div("Conta"), grupo(
+    item("hist", "Ver histórico", "tudo que aconteceu com a assinatura", () => { fechar(); verHistorico(l, hl); })),
+    Object.assign(document.createElement("div"), {className: "ac-sep"}),
+    item("lixo", "Excluir licença", "dá para recuperar na aba Excluidas", confirmarExcluir, "perigo"));
+  d.replaceChildren(topo, corpo);
+  d.onclick = e => { if (e.target === d) fechar(); };
+  d.showModal();
+}
+async function verHistorico(l, hl){
+  hl.hidden = false; hl.textContent = "Carregando…";
+  try{ const j = await api({acao: "admin_historico", email: l.email});
+    hl.textContent = "";
+    if (!j.ok){ hl.textContent = j.erro || "Não deu para carregar."; return; }
+    if (!j.historico.length){ hl.textContent = "Nada registrado ainda."; return; }
+    j.historico.forEach(h => { const r = document.createElement("div"); r.className = "hist-l";
+      const d = document.createElement("span"); d.textContent = h.data ? new Date(h.data).toLocaleString("pt-BR", {dateStyle: "short", timeStyle: "short"}) : "";
+      const e = document.createElement("b"); e.textContent = h.evento;
+      const x = document.createElement("small"); x.textContent = [h.detalhe, h.valor ? "valor " + h.valor : "", h.pedido ? "pedido " + h.pedido : ""].filter(Boolean).join(" · ");
+      r.append(d, e, x); hl.appendChild(r); });
+  }catch(_){ hl.textContent = "Sem conexão."; }
+}
+/* REEMBOLSOS: o cliente pede pelo app (Seu plano > Pedir reembolso). Devolver = a Stripe devolve no mesmo Pix ou cartão
+   e a licença é cortada sozinha. "No prazo" = até 7 dias da compra (garantia); fora disso, você decide. */
+let reembolsos = [];
+async function carregarReemb(){
+  try{ const j = await api({acao: "admin_reembolsos"}); if (!j.ok) return; reembolsos = j.pedidos || [];
+    const n = reembolsos.filter(x => x.status === "pendente").length, b = $("abrirReemb");
+    b.querySelector(".n") && b.querySelector(".n").remove();
+    if (n){ const s = document.createElement("span"); s.className = "n"; s.textContent = n; b.appendChild(s); }
+  }catch(_){}
+}
+function abrirReemb(){
+  const d = $("dlgReemb"), fechar = () => d.close();
+  const cab = document.createElement("div"); cab.className = "dlg-cab"; cab.innerHTML = '<h2>Reembolsos</h2><button class="fechar" aria-label="Fechar">×</button>'; cab.querySelector("button").onclick = fechar;
+  const corpo = document.createElement("div"); corpo.style.cssText = "max-height:70vh;overflow:auto";
+  if (!reembolsos.length){ const p = document.createElement("p"); p.className = "nota"; p.textContent = "Nenhum pedido de reembolso. Quando um cliente pedir pelo app (Seu plano > Pedir reembolso), aparece aqui e você recebe um e-mail."; corpo.appendChild(p); }
+  reembolsos.forEach(x => {
+    const it = document.createElement("div"); it.className = "re-item";
+    const t = document.createElement("b"); t.textContent = (x.nome || x.email); const st = document.createElement("span"); st.className = "re-st " + x.status; st.textContent = x.status; t.appendChild(st);
+    const s1 = document.createElement("small"); s1.textContent = x.email;
+    const s2 = document.createElement("small");
+    s2.textContent = (x.valor ? "R$ " + Number(x.valor).toFixed(2).replace(".", ",") + " pago em " + dataBR(x.pagoEm) : "pagamento não encontrado") + " · pediu em " + dataBR(x.data);
+    const pr = document.createElement("small"); pr.textContent = x.noPrazo ? "Dentro dos 7 dias da garantia" : "Fora do prazo de 7 dias: você decide"; if (!x.noPrazo) pr.className = "re-prazo";
+    it.append(t, s1, s2, pr);
+    if (x.motivo){ const m = document.createElement("p"); m.className = "re-mot"; m.textContent = "“" + x.motivo + "”"; it.appendChild(m); }
+    if (x.status === "pendente"){
+      const bs = document.createElement("div"); bs.className = "btns";
+      const rec = document.createElement("button"); rec.className = "btn"; rec.textContent = "Recusar";
+      const dev = document.createElement("button"); dev.className = "btn ouro"; dev.textContent = "Devolver " + (x.valor ? "R$ " + Number(x.valor).toFixed(2).replace(".", ",") : "");
+      const agir = async (acao, ok, b) => {
+        if (!b.dataset.ok){ b.dataset.ok = "1"; const t0 = b.textContent; b.textContent = "Toque de novo para confirmar"; setTimeout(() => { delete b.dataset.ok; b.textContent = t0; }, 4000); return; }
+        rec.disabled = dev.disabled = true;
+        try{ const j = await api({acao, linha: x.linha}); if (j.ok){ toast(ok); await carregarReemb(); abrirReemb(); carregar(); } else { toast(j.erro || "Não deu certo"); rec.disabled = dev.disabled = false; } }
+        catch(_){ toast("Sem conexão"); rec.disabled = dev.disabled = false; }
+      };
+      rec.onclick = () => agir("admin_recusar_reemb", "Pedido recusado", rec);
+      dev.onclick = () => agir("admin_reembolsar", "Dinheiro devolvido pela Stripe", dev);
+      bs.append(rec, dev); it.appendChild(bs);
+    } else if (x.resolvido){ const r = document.createElement("small"); r.textContent = (x.status === "devolvido" ? "Devolvido em " : "Recusado em ") + dataBR(x.resolvido); it.appendChild(r); }
+    corpo.appendChild(it);
+  });
+  d.replaceChildren(cab, corpo);
+  d.onclick = e => { if (e.target === d) fechar(); };
+  if (!d.open) d.showModal();
+}
+$("abrirReemb").onclick = async () => { await carregarReemb(); abrirReemb(); };
 $("busca").oninput = desenhar;
 $("abrirNova").onclick = () => { $("dlgNova").showModal(); $("nNome").focus(); };
 $("fecharNova").onclick = () => $("dlgNova").close();
