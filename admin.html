@@ -198,7 +198,7 @@ function desenhar(){
     const botao = (t, fn, cls) => { const b = document.createElement("button"); b.className = "btn pq " + (cls || ""); b.textContent = t; b.onclick = async () => { b.disabled = true; try{ const j = await fn(); if (j && j.ok === false) toast(j.erro); else { toast("Feito"); await carregar(); } }catch(e){ toast("Sem conexão"); } b.disabled = false; }; ac.appendChild(b); };
     botao(s === "bloqueado" ? "Ativar" : "Bloquear", () => api({acao: "admin_status", email: l.email, status: s === "bloqueado" ? "ativo" : "bloqueado"}), s === "bloqueado" ? "" : "perigo");
     botao("+30 dias", () => api({acao: "admin_validade", email: l.email, dias: 30}));
-    /* v16: este botão mexe só na CORTESIA (o Pro pago vem da Kiwify e vence sozinho) */
+    /* v16: este botão mexe só na CORTESIA (o Pro pago vem da Cakto/Kiwify e vence sozinho) */
     botao(l.cortesia ? "Tirar cortesia" : "Dar Pro cortesia", () => api({acao: "admin_pro", email: l.email, pro: l.cortesia ? "0" : "1"}), l.cortesia ? "" : "ouro-l");
     if (l.validoAte) botao("Tornar vitalícia", () => api({acao: "admin_validade", email: l.email, dias: 0}));
     if (l.aparelhos) botao("Liberar", () => api({acao: "admin_liberar", email: l.email}));
