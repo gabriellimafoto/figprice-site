@@ -58,6 +58,7 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .hist-l{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:6px 0;border-bottom:1px dashed #3a2a20}
 .hist-l span{color:#bfae99;grid-row:span 2}
 .hist-l small{color:#bfae99}
+.hist-l.erro b,.hist-l.erro small{color:var(--vermelho,#e57373)}
 .tag.pro{background:var(--ouro);color:#2a2420;vertical-align:2px}
 .tag.basico{background:#4a4540;color:#d8d2ca;vertical-align:2px}
 .resumo-total{cursor:pointer;border-radius:12px;padding:2px 6px;margin:-2px -6px}
@@ -336,11 +337,32 @@ function menuLic(l, hl, excluir){
       const sim = document.createElement("button"); sim.className = "btn ouro"; sim.textContent = "Gerar e enviar";
       sim.onclick = async () => { fechar(); try{ const j = await api({acao: "admin_novo_codigo", email: l.email, enviar: "1"}); if (j.ok){ toast("Novo código: " + j.codigo + " (enviado)"); await carregar(); } else toast(j.erro); }catch(_){ toast("Sem conexão"); } };
       cf.querySelector(".btns").append(nao, sim); d.replaceChildren(topo, cf); })),
+    div("Suporte"), grupo(
+    item("hist", "Ver passos no app", "o que a pessoa abriu e tocou (últimos 3 dias)", () => verPassos(l))),
     Object.assign(document.createElement("div"), {className: "ac-sep"}),
     item("lixo", "Excluir licença", "dá para recuperar na aba Excluidas", confirmarExcluir, "perigo"));
   d.replaceChildren(topo, corpo);
   d.onclick = e => { if (e.target === d) fechar(); };
   d.showModal();
+}
+/* passos no app (registro enviado pelo app: erros, relatar problema, 1x por dia) */
+async function verPassos(l){
+  const d = $("dlgAcoes");
+  const cab = document.createElement("div"); cab.className = "ac-topo"; cab.innerHTML = "<b>Passos no app</b><small></small>"; cab.querySelector("small").textContent = l.email;
+  const corpo = document.createElement("div"); corpo.className = "ac-corpo"; corpo.textContent = "Carregando…";
+  d.replaceChildren(cab, corpo); if (!d.open) d.showModal();
+  try{ const j = await api({acao: "admin_logs", email: l.email}); corpo.textContent = "";
+    if (!j.ok || !j.envios.length){ corpo.textContent = "Nenhum registro nos últimos 3 dias. O app envia quando dá erro, quando a pessoa relata um problema e 1 vez por dia."; return; }
+    j.envios.forEach(e => {
+      const t = document.createElement("div"); t.className = "ac-div"; t.textContent = new Date(e.data).toLocaleString("pt-BR", {dateStyle: "short", timeStyle: "short"}) + " · " + e.motivo + " · v" + e.versao + " · " + e.tela; corpo.appendChild(t);
+      let passos = []; try{ passos = JSON.parse(e.log); }catch(_){}
+      const box = document.createElement("div"); box.className = "hist";
+      passos.slice(-120).reverse().forEach(p => { const r = document.createElement("div"); r.className = "hist-l" + (p[1] === "ERRO" ? " erro" : "");
+        const h = document.createElement("span"); h.textContent = new Date(p[0]).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit"});
+        const b = document.createElement("b"); b.textContent = p[1]; const sm = document.createElement("small"); sm.textContent = p[2]; r.append(h, b, sm); box.appendChild(r); });
+      corpo.appendChild(box);
+    });
+  }catch(_){ corpo.textContent = "Sem conexão."; }
 }
 async function verHistorico(l, hl){
   hl.hidden = false; hl.textContent = "Carregando…";
