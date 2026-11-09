@@ -60,7 +60,7 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .hist-l small{color:#bfae99}
 .tag.pro{background:var(--ouro);color:#2a2420;vertical-align:2px}
 .btn.ouro-l{color:var(--ouro);border-color:var(--ouro)}
-.tag.ativo{background:#1f4a43;color:#bfeee5}.tag.bloqueado{background:#5a1f19;color:#ffc9c2}.tag.vencida{background:#5a4513;color:#f3d48b}
+.tag.ativo{background:#1f4a43;color:#bfeee5}.tag.bloqueado{background:#5a1f19;color:#ffc9c2}.tag.vencida{background:#5a4513;color:#f3d48b}.tag.reembolsada{background:#2a3550;color:#c3d3ff}.tag.contestada{background:#4a1f3f;color:#ffc2ec}
 .lic{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .12s,border-color .2s}
 .lic:active{transform:scale(.99)}
 .lic.segurando{border-color:var(--vermelho);transition:border-color .5s}
@@ -131,7 +131,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
   </section>
 
   <section id="telaPainel" hidden>
-    <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ouro" id="abrirNova">+ Nova licença</button><button class="btn" id="abrirReemb">Reembolsos</button><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
+    <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ouro" id="abrirNova">+ Nova licença</button><button class="btn" id="abrirReemb">Reembolsos e motivos</button><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
     <p class="carregando" id="carregando" hidden>Atualizando…</p>
     <div class="stats card" id="stats"></div>
     <dialog id="dlgNova">
@@ -189,7 +189,10 @@ $("lCodigo").onkeydown = e => { if (e.key === "Enter") $("entrar").click(); };
 $("sair").onclick = async () => { try{ await api({acao: "admin_sair"}); }catch(_){} esquecer(); try{ localStorage.removeItem("ff_admin_cache"); }catch(_){} mostrar(); };
 $("atualizar").onclick = () => carregar();
 function situacao(l){
-  if (String(l.status).toLowerCase() !== "ativo") return "bloqueado";
+  const st = String(l.status).toLowerCase();
+  if (st === "reembolsado") return "reembolsada"; /* v22: o motivo do bloqueio aparece no selo */
+  if (st === "contestado") return "contestada";
+  if (st !== "ativo") return "bloqueado";
   if (l.validoAte && Date.now() > l.validoAte) return "vencida";
   return "ativo";
 }
@@ -207,7 +210,7 @@ function desenhar(){
   $("stats").innerHTML = '<div class="resumo-total"><b></b><span>licenças no total</span></div><div class="resumo-linha"></div>';
   $("stats").querySelector("b").textContent = dados.length;
   const linha = $("stats").querySelector(".resumo-linha");
-  [["ativas", ativos.length], ["Pro", dados.filter(l => l.pro).length], ["vitalícias", ativos.filter(l => !l.validoAte).length], ["assinaturas", ativos.filter(l => l.validoAte).length], ["vencendo em 7 dias", vencendo.length, vencendo.length > 0], ["bloqueadas", dados.filter(l => situacao(l) === "bloqueado").length]]
+  [["ativas", ativos.length], ["Pro", dados.filter(l => l.pro).length], ["vitalícias", ativos.filter(l => !l.validoAte).length], ["assinaturas", ativos.filter(l => l.validoAte).length], ["vencendo em 7 dias", vencendo.length, vencendo.length > 0], ["bloqueadas", dados.filter(l => situacao(l) === "bloqueado").length], ["reembolsadas", dados.filter(l => situacao(l) === "reembolsada").length]]
     .forEach(([n, v, alerta]) => { const sp = document.createElement("span"); if (alerta) sp.className = "alerta"; const b = document.createElement("b"); b.textContent = v; sp.append(b, n); linha.appendChild(sp); });
   $("filtros").innerHTML = "";
   FILTROS.forEach(([id, nome]) => { const b = document.createElement("button"); b.className = "btn pq"; b.textContent = nome; b.setAttribute("aria-pressed", String(filtro === id)); b.onclick = () => { filtro = id; desenhar(); }; $("filtros").appendChild(b); });
@@ -215,7 +218,7 @@ function desenhar(){
   const lista = dados.filter(l => {
     const s = situacao(l);
     if (filtro === "vencendo" && !(s === "ativo" && l.validoAte && l.validoAte - Date.now() < 7 * DIA)) return false;
-    if (filtro !== "todas" && filtro !== "vencendo" && s !== filtro) return false;
+    if (filtro !== "todas" && filtro !== "vencendo" && s !== filtro && !(filtro === "bloqueado" && (s === "reembolsada" || s === "contestada"))) return false;
     return !q || String(l.email).toLowerCase().includes(q) || String(l.nome).toLowerCase().includes(q);
   }).sort((a, b) => (b.data || 0) - (a.data || 0));
   $("lista").innerHTML = "";
@@ -227,7 +230,7 @@ function desenhar(){
     cab.querySelector(".nm").textContent = l.nome || l.email;
     if (l.pro){ const pr = document.createElement("span"); pr.className = "tag pro"; pr.textContent = l.cortesia ? "PRO cortesia" : "PRO"; cab.querySelector(".nm").append(" ", pr); }
     cab.querySelector(".em").textContent = (l.nome ? l.email + " · " : "") + "código " + l.codigo;
-    cab.querySelector(":scope > .tag").textContent = s === "ativo" ? "Ativa" : s === "vencida" ? "Vencida" : "Bloqueada";
+    cab.querySelector(":scope > .tag").textContent = ({ativo: "Ativa", vencida: "Vencida", reembolsada: "Reembolsada", contestada: "Contestada"})[s] || "Bloqueada";
     const info = document.createElement("div"); info.className = "info";
     const datas = document.createElement("span"); datas.textContent = "Desde " + dataBR(l.data) + " · " + (l.validoAte ? "válida até " + dataBR(l.validoAte) : "vitalícia") + (l.proTipo && l.proAte ? " · " + l.proTipo + " até " + dataBR(l.proAte) : "") + (l.cancelado ? " · cancelou: " + l.cancelado : "");
     const ap = Number(l.aparelhos) || 0, aps = document.createElement("span"); aps.className = "aps" + (ap >= 2 ? " cheio" : ""); aps.title = ap + " de 2 aparelhos em uso";
@@ -333,13 +336,13 @@ async function carregarReemb(){
 }
 function abrirReemb(){
   const d = $("dlgReemb"), fechar = () => d.close();
-  const cab = document.createElement("div"); cab.className = "dlg-cab"; cab.innerHTML = '<h2>Reembolsos</h2><button class="fechar" aria-label="Fechar">×</button>'; cab.querySelector("button").onclick = fechar;
+  const cab = document.createElement("div"); cab.className = "dlg-cab"; cab.innerHTML = '<h2>Reembolsos e motivos</h2><button class="fechar" aria-label="Fechar">×</button>'; cab.querySelector("button").onclick = fechar;
   const corpo = document.createElement("div"); corpo.style.cssText = "max-height:70vh;overflow:auto";
-  if (!reembolsos.length){ const p = document.createElement("p"); p.className = "nota"; p.textContent = "Nenhum pedido de reembolso. Quando um cliente pedir pelo app (Seu plano > Pedir reembolso), aparece aqui e você recebe um e-mail."; corpo.appendChild(p); }
+  if (!reembolsos.length){ const p = document.createElement("p"); p.className = "nota"; p.textContent = "Nenhum pedido de reembolso. Quando um cliente pedir pelo app (Seu plano > Pedir reembolso), aparece aqui e você recebe um e-mail. Devolver também cancela a assinatura daquele produto (a Stripe não cobra de novo) e a licença fica Reembolsada."; corpo.appendChild(p); }
   reembolsos.forEach(x => {
     const it = document.createElement("div"); it.className = "re-item";
     const t = document.createElement("b"); t.textContent = (x.nome || x.email); const st = document.createElement("span"); st.className = "re-st " + x.status; st.textContent = x.status; t.appendChild(st);
-    const s1 = document.createElement("small"); s1.textContent = x.email;
+    const s1 = document.createElement("small"); s1.textContent = x.email + (x.produto ? " · " + x.produto : "");
     const s2 = document.createElement("small");
     s2.textContent = (x.valor ? "R$ " + Number(x.valor).toFixed(2).replace(".", ",") + " pago em " + dataBR(x.pagoEm) : "pagamento não encontrado") + " · pediu em " + dataBR(x.data);
     const pr = document.createElement("small"); pr.textContent = x.noPrazo ? "Dentro dos 7 dias da garantia" : "Fora do prazo de 7 dias: você decide"; if (!x.noPrazo) pr.className = "re-prazo";
@@ -348,7 +351,7 @@ function abrirReemb(){
     if (x.status === "pendente"){
       const bs = document.createElement("div"); bs.className = "btns";
       const rec = document.createElement("button"); rec.className = "btn"; rec.textContent = "Recusar";
-      const dev = document.createElement("button"); dev.className = "btn ouro"; dev.textContent = "Devolver " + (x.valor ? "R$ " + Number(x.valor).toFixed(2).replace(".", ",") : "");
+      const dev = document.createElement("button"); dev.className = "btn ouro"; dev.textContent = "Devolver " + (x.valor ? "R$ " + Number(x.valor).toFixed(2).replace(".", ",") : ""); dev.title = "Devolve o dinheiro pela Stripe e cancela a assinatura desse produto (não cobra de novo)";
       const agir = async (acao, ok, b) => {
         if (!b.dataset.ok){ b.dataset.ok = "1"; const t0 = b.textContent; b.textContent = "Toque de novo para confirmar"; setTimeout(() => { delete b.dataset.ok; b.textContent = t0; }, 4000); return; }
         rec.disabled = dev.disabled = true;
@@ -361,6 +364,19 @@ function abrirReemb(){
     } else if (x.resolvido){ const r = document.createElement("small"); r.textContent = (x.status === "devolvido" ? "Devolvido em " : "Recusado em ") + dataBR(x.resolvido); it.appendChild(r); }
     corpo.appendChild(it);
   });
+  /* motivos de quem cancelou, pediu reembolso ou quase saiu */
+  const mt = document.createElement("h3"); mt.textContent = "Motivos"; mt.style.cssText = "margin:18px 0 6px;font-size:1rem";
+  corpo.appendChild(mt);
+  const ml = document.createElement("div"); ml.className = "nota"; ml.textContent = "Carregando…"; corpo.appendChild(ml);
+  api({acao: "admin_feedback"}).then(j => {
+    ml.textContent = "";
+    if (!j.ok || !j.itens.length){ ml.textContent = "Ninguém cancelou nem quase saiu ainda."; return; }
+    j.itens.forEach(x => { const it = document.createElement("div"); it.className = "re-item";
+      const t = document.createElement("b"); t.textContent = x.motivo || "(sem motivo)";
+      const s1 = document.createElement("small"); s1.textContent = x.tipo + " · " + x.email + " · " + dataBR(x.data);
+      it.append(t, s1); if (x.texto && x.texto !== x.motivo){ const p = document.createElement("p"); p.className = "re-mot"; p.textContent = "“" + x.texto + "”"; it.appendChild(p); }
+      ml.appendChild(it); });
+  }).catch(() => { ml.textContent = "Sem conexão."; });
   d.replaceChildren(cab, corpo);
   d.onclick = e => { if (e.target === d) fechar(); };
   if (!d.open) d.showModal();
