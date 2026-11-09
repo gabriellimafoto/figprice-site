@@ -62,6 +62,7 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .idioma.fora{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--ouro);color:var(--ouro);font-weight:700}
 .hist-l.erro b,.hist-l.erro small{color:var(--vermelho,#e57373)}
 .tag.pro{background:var(--ouro);color:#2a2420;vertical-align:2px}
+.tag.pais{background:#1d3550;color:#cfe3ff;vertical-align:2px}
 .tag.basico{background:#4a4540;color:#d8d2ca;vertical-align:2px}
 .resumo-total{cursor:pointer;border-radius:12px;padding:2px 6px;margin:-2px -6px}
 .resumo-total[aria-pressed="true"] span{color:var(--verde)}
@@ -267,6 +268,8 @@ function desenhar(){
     cab.innerHTML = '<div><div class="nm"></div><div class="em"></div></div><span class="tag ' + s + '"></span>';
     cab.querySelector(".nm").textContent = l.nome || l.email;
     { const pr = document.createElement("span"); pr.className = "tag " + (l.pro ? "pro" : "basico"); pr.textContent = l.pro ? (l.cortesia ? "PRO cortesia" : l.proTipo === "teste" ? "PRO teste" : "PRO") : "BÁSICO"; cab.querySelector(".nm").append(" ", pr); }
+    /* país do cliente (pelo cartão da Stripe): só aparece quando NÃO é do Brasil */
+    if (l.pais && l.pais !== "BR"){ const pa = document.createElement("span"); pa.className = "tag pais"; pa.textContent = bandeira(l.pais) + " " + nomePais(l.pais); cab.querySelector(".nm").append(" ", pa); }
     cab.querySelector(".em").textContent = (l.nome ? l.email + " · " : "") + "código " + l.codigo;
     cab.querySelector(":scope > .tag").textContent = ({ativo: "Ativa", vencida: "Vencida", reembolsada: "Reembolsada", contestada: "Contestada"})[s] || "Bloqueada";
     const info = document.createElement("div"); info.className = "info";
@@ -358,6 +361,8 @@ function menuLic(l, hl, excluir){
 }
 /* passos no app (registro enviado pelo app: erros, relatar problema, 1x por dia) */
 /* idioma do aparelho (vem junto com a tela, ex. "390x844 pl-PL"): bandeira + nome; fora do Brasil fica em destaque */
+const bandeira = reg => /^[A-Z]{2}$/.test(reg) ? String.fromCodePoint(...[...reg].map(c => 127397 + c.charCodeAt(0))) : "🌐";
+function nomePais(reg){ try{ return new Intl.DisplayNames(["pt-BR"], {type: "region"}).of(reg); }catch(_){ return reg; } }
 function idiomaDe(tela){
   const cod = String(tela || "").split(" ")[1]; if (!cod) return null;
   const [lg, rg] = cod.split("-"), reg = (rg || ({pt: "BR", en: "US", es: "ES", pl: "PL", de: "DE", fr: "FR", it: "IT", ja: "JP"})[lg] || "").toUpperCase();
