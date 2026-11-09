@@ -58,6 +58,8 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .hist-l{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:6px 0;border-bottom:1px dashed #3a2a20}
 .hist-l span{color:#bfae99;grid-row:span 2}
 .hist-l small{color:#bfae99}
+.idioma{margin:6px 0 2px;font-size:.88rem;color:var(--muted)}
+.idioma.fora{display:inline-block;padding:6px 10px;border-radius:10px;border:1px solid var(--ouro);color:var(--ouro);font-weight:700}
 .hist-l.erro b,.hist-l.erro small{color:var(--vermelho,#e57373)}
 .tag.pro{background:var(--ouro);color:#2a2420;vertical-align:2px}
 .tag.basico{background:#4a4540;color:#d8d2ca;vertical-align:2px}
@@ -117,6 +119,11 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .acoes .btn.pq{min-height:30px;padding:4px 10px;font-size:.8rem}
 dialog{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:22px;width:min(440px,100% - 32px)}
 dialog::backdrop{background:rgba(0,0,0,.6)}
+html:has(dialog[open]),html:has(dialog[open]) body{overflow:hidden}
+dialog,.ac-corpo{overscroll-behavior:contain}
+.ac-topo{position:relative;padding-right:56px!important}
+.ac-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--fundo);color:var(--ink);font-size:1.3rem;line-height:1;cursor:pointer;display:grid;place-items:center}
+.ac-x:hover{border-color:var(--ouro);color:var(--ouro)}
 .dlg-cab{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .fechar{background:none;border:0;color:var(--muted);font-size:1.6rem;line-height:1;cursor:pointer;padding:4px 8px}
 .toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:9;font-weight:600}
@@ -169,7 +176,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <script>
 const API = "https://script.google.com/macros/s/AKfycbw4T6NZEemGmCQf1r_PoYeMVFq57wtigSd-XYc711VnBA5y58V0UBnkNgGv0e1bOqFixw/exec";
 const DIA = 864e5;
-let token = localStorage.getItem("ff_admin") || sessionStorage.getItem("ff_admin"), dados = [], filtro = "todas";
+let token = localStorage.getItem("ff_admin") || sessionStorage.getItem("ff_admin"), dados = [], filtro = localStorage.getItem("ff_admin_filtro") || "todas";
 function esquecer(){ localStorage.removeItem("ff_admin"); sessionStorage.removeItem("ff_admin"); token = null; }
 const $ = id => document.getElementById(id);
 function toast(t){ const e = $("toast"); e.textContent = t; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => e.hidden = true, 2600); }
@@ -215,11 +222,12 @@ async function carregar(){
   $("carregando").hidden = false; if (dados.length) $("lista").classList.add("velha");
   try{ const j = await api({acao: "admin_listar"}); if (!j.ok){ toast(j.erro || "Erro ao carregar"); return; } dados = j.licencas; try{ localStorage.setItem("ff_admin_cache", JSON.stringify(dados)); }catch(_){} desenhar(); }
   catch(e){ toast("Sem conexão com a planilha"); }
-  finally{ $("carregando").hidden = true; $("lista").classList.remove("velha"); carregarReemb(); }
+  finally{ $("carregando").hidden = true; $("lista").classList.remove("velha"); carregarReemb(); carregarFeedback().catch(() => {}); }
 }
 const FILTROS = [["todas", "Todas"], ["ativo", "Ativas"], ["vencendo", "Vencendo em 7 dias"], ["vencida", "Vencidas"], ["bloqueado", "Bloqueadas"]];
 let FILTRO_FN = null;
 function desenhar(){
+  localStorage.setItem("ff_admin_filtro", filtro); /* lembra o último filtro escolhido */
   const ativos = dados.filter(l => situacao(l) === "ativo");
   const vencendo = ativos.filter(l => l.validoAte && l.validoAte - Date.now() < 7 * DIA);
   /* (09/11) os números do topo SÃO os filtros: tocar filtra a lista; tocar de novo volta para todas */
@@ -300,6 +308,8 @@ const ICO = {
   hist: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   lixo: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'
 };
+/* botão × de fechar em toda janela grande (antes só fechava tocando fora) */
+function botaoX(d){ const x = document.createElement("button"); x.type = "button"; x.className = "ac-x"; x.setAttribute("aria-label", "Fechar"); x.textContent = "×"; x.onclick = () => d.close(); return x; }
 function menuLic(l, hl, excluir){
   const d = $("dlgAcoes"), s = situacao(l);
   const svg = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICO[k] + '</svg>';
@@ -308,6 +318,7 @@ function menuLic(l, hl, excluir){
   const item = (ico, txt, sub, fn, cls) => { const b = document.createElement("button"); b.type = "button"; b.className = "ac-item " + (cls || ""); b.innerHTML = svg(ico) + "<span></span>"; b.querySelector("span").textContent = txt; if (sub){ const sm = document.createElement("small"); sm.textContent = sub; b.querySelector("span").append(document.createElement("br"), sm); } b.onclick = fn; return b; };
   const div = t => { const e = document.createElement("div"); e.className = "ac-div"; e.textContent = t; return e; };
   const topo = document.createElement("div"); topo.className = "ac-topo"; topo.innerHTML = "<b></b><small></small>";
+  topo.append(botaoX(d));
   topo.querySelector("b").textContent = l.nome || l.email; topo.querySelector("small").textContent = l.email + " · código " + l.codigo;
   const confirmarExcluir = () => {
     const cf = document.createElement("div"); cf.className = "ac-conf"; cf.innerHTML = "<b>Excluir esta licença?</b><p></p><div class=\"btns\"></div>";
@@ -346,15 +357,25 @@ function menuLic(l, hl, excluir){
   d.showModal();
 }
 /* passos no app (registro enviado pelo app: erros, relatar problema, 1x por dia) */
+/* idioma do aparelho (vem junto com a tela, ex. "390x844 pl-PL"): bandeira + nome; fora do Brasil fica em destaque */
+function idiomaDe(tela){
+  const cod = String(tela || "").split(" ")[1]; if (!cod) return null;
+  const [lg, rg] = cod.split("-"), reg = (rg || ({pt: "BR", en: "US", es: "ES", pl: "PL", de: "DE", fr: "FR", it: "IT", ja: "JP"})[lg] || "").toUpperCase();
+  const band = /^[A-Z]{2}$/.test(reg) ? String.fromCodePoint(...[...reg].map(c => 127397 + c.charCodeAt(0))) : "🌐";
+  let nome = cod; try{ nome = new Intl.DisplayNames(["pt-BR"], {type: "language"}).of(lg); }catch(_){}
+  const br = lg === "pt";
+  return {br, txt: band + " Aparelho em " + nome + (br ? "" : " · a tela dele aparece traduzida; aqui os passos vêm em português")};
+}
 async function verPassos(l){
   const d = $("dlgAcoes");
-  const cab = document.createElement("div"); cab.className = "ac-topo"; cab.innerHTML = "<b>Passos no app</b><small></small>"; cab.querySelector("small").textContent = l.email;
+  const cab = document.createElement("div"); cab.className = "ac-topo"; cab.innerHTML = "<b>Passos no app</b><small></small>"; cab.querySelector("small").textContent = l.email; cab.append(botaoX(d));
   const corpo = document.createElement("div"); corpo.className = "ac-corpo"; corpo.textContent = "Carregando…";
   d.replaceChildren(cab, corpo); if (!d.open) d.showModal();
   try{ const j = await api({acao: "admin_logs", email: l.email}); corpo.textContent = "";
     if (!j.ok || !j.envios.length){ corpo.textContent = "Nenhum registro nos últimos 3 dias. O app envia quando dá erro, quando a pessoa relata um problema e 1 vez por dia."; return; }
     j.envios.forEach(e => {
-      const t = document.createElement("div"); t.className = "ac-div"; t.textContent = new Date(e.data).toLocaleString("pt-BR", {dateStyle: "short", timeStyle: "short"}) + " · " + e.motivo + " · v" + e.versao + " · " + e.tela; corpo.appendChild(t);
+      const t = document.createElement("div"); t.className = "ac-div"; const idi = idiomaDe(e.tela); t.textContent = new Date(e.data).toLocaleString("pt-BR", {dateStyle: "short", timeStyle: "short"}) + " · " + e.motivo + " · v" + e.versao + " · " + String(e.tela || "").split(" ")[0]; corpo.appendChild(t);
+      if (idi){ const b = document.createElement("div"); b.className = "idioma" + (idi.br ? "" : " fora"); b.textContent = idi.txt; corpo.appendChild(b); }
       let passos = []; try{ passos = JSON.parse(e.log); }catch(_){}
       const box = document.createElement("div"); box.className = "hist";
       passos.slice(-120).reverse().forEach(p => { const r = document.createElement("div"); r.className = "hist-l" + (p[1] === "ERRO" ? " erro" : "");
@@ -421,7 +442,7 @@ function abrirReemb(){
   const mt = document.createElement("h3"); mt.textContent = "Motivos"; mt.style.cssText = "margin:18px 0 6px;font-size:1rem";
   corpo.appendChild(mt);
   const ml = document.createElement("div"); ml.className = "nota"; ml.textContent = "Carregando…"; corpo.appendChild(ml);
-  api({acao: "admin_feedback"}).then(j => {
+  const pinta = j => {
     ml.textContent = "";
     if (!j.ok || !j.itens.length){ ml.textContent = "Ninguém cancelou nem quase saiu ainda."; return; }
     j.itens.forEach(x => { const it = document.createElement("div"); it.className = "re-item";
@@ -429,12 +450,17 @@ function abrirReemb(){
       const s1 = document.createElement("small"); s1.textContent = x.tipo + " · " + x.email + " · " + dataBR(x.data);
       it.append(t, s1); if (x.texto && x.texto !== x.motivo){ const p = document.createElement("p"); p.className = "re-mot"; p.textContent = "“" + x.texto + "”"; it.appendChild(p); }
       ml.appendChild(it); });
-  }).catch(() => { ml.textContent = "Sem conexão."; });
+  };
+  if (feedbacks) pinta(feedbacks);
+  carregarFeedback().then(j => { if (j) pinta(j); }).catch(() => { if (!feedbacks) ml.textContent = "Sem conexão."; });
   d.replaceChildren(cab, corpo);
   d.onclick = e => { if (e.target === d) fechar(); };
   if (!d.open) d.showModal();
 }
-$("abrirReemb").onclick = async () => { await carregarReemb(); abrirReemb(); };
+/* abre NA HORA com o que já foi carregado junto da lista; depois atualiza por trás */
+let feedbacks = null;
+async function carregarFeedback(){ const j = await api({acao: "admin_feedback"}); if (j && j.ok) feedbacks = j; return j; }
+$("abrirReemb").onclick = () => { abrirReemb(); carregarReemb().then(() => { if ($("dlgReemb").open) abrirReemb(); }); };
 $("busca").oninput = desenhar;
 $("abrirNova").onclick = () => { $("dlgNova").showModal(); $("nNome").focus(); };
 $("fecharNova").onclick = () => $("dlgNova").close();
