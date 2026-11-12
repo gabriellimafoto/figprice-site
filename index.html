@@ -459,6 +459,38 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px}
   .recibo li{transition:none}
   .celular .tela img{transition:none}
 }
+
+/* bloco "jeito antigo x jeito FigPrice" */
+#jeito h2{max-width:20ch}
+.jeitos{display:grid;grid-template-columns:1fr 1.12fr;gap:22px;margin-top:40px;align-items:stretch}
+.jeito{border-radius:22px;padding:30px;min-width:0}
+.jeito h3{font-size:1.55rem;margin-bottom:6px}
+.jeito .jt-sub{color:var(--suave);font-size:1rem;margin-bottom:18px}
+.jeito ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.jeito li{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start;font-size:1.05rem;line-height:1.35}
+.jeito li i{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:.95rem}
+.jeito.velho{background:var(--painel);border:1px dashed var(--linha)}
+.jeito.velho h3{color:var(--suave)}
+.jeito.velho li{color:var(--suave)}
+.jeito.velho li i{background:#3a2420;color:#ff9d8f}
+.jeito.velho li span{text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:transparent;transition:text-decoration-color .6s ease,opacity .6s ease}
+.jeito.velho.visto li span{text-decoration-color:currentColor;opacity:.75}
+.jeito.velho.visto li:nth-child(1) span{transition-delay:.5s}.jeito.velho.visto li:nth-child(2) span{transition-delay:.8s}.jeito.velho.visto li:nth-child(3) span{transition-delay:1.1s}.jeito.velho.visto li:nth-child(4) span{transition-delay:1.4s}.jeito.velho.visto li:nth-child(5) span{transition-delay:1.7s}
+.jt-tempo{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--linha);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800}
+.jt-tempo b{white-space:nowrap;font-size:clamp(1.6rem,7vw,2rem);letter-spacing:-.03em;line-height:1}
+.jt-tempo small{font-size:.95rem;font-weight:600;color:var(--suave)}
+.jeito.novo{position:relative;background:#2b1f12;background:linear-gradient(160deg,#33240f,#241912 70%);border:2px solid var(--latao);box-shadow:0 0 0 1px rgba(226,181,74,.25),0 18px 50px -18px rgba(226,181,74,.45);overflow:hidden}
+.jeito.novo::before{content:"";position:absolute;inset:0 auto 0 -60%;width:45%;background:linear-gradient(100deg,transparent,rgba(255,236,180,.16),transparent);transform:skewX(-18deg);animation:jtFaixa 4.5s ease-in-out infinite;pointer-events:none}
+@keyframes jtFaixa{0%,55%{left:-60%}100%{left:130%}}
+.jeito.novo h3{color:var(--latao)}
+.jeito.novo .jt-sub{color:var(--texto)}
+.jeito.novo li i{background:var(--latao);color:var(--madeira)}
+.jeito.novo .jt-tempo{border-top-color:rgba(226,181,74,.35)}
+.jeito.novo .jt-tempo b{color:var(--latao)}
+.jt-fecho{margin-top:28px;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(1.3rem,3vw,1.9rem);letter-spacing:-.02em;line-height:1.2;max-width:26ch}
+.jt-fecho em{font-style:normal;color:var(--latao)}
+@media (max-width:760px){.jeitos{grid-template-columns:1fr}.jeito{padding:24px}}
+@media (prefers-reduced-motion: reduce){.jeito.novo::before{animation:none;display:none}.jeito.velho li span{transition:none}}
 </style>
 </head>
 <body>
@@ -599,14 +631,51 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px}
   </div>
 </section>
 
+<section id="jeito">
+  <div class="wrap">
+    <h2 class="aparece">Você não precisa medir resina para saber quanto cobrar.</h2>
+    <p class="lead aparece">Calcular custo por custo era o único jeito. Não é mais. O FigPrice aprende como você cobra e faz a conta de toda peça nova.</p>
+    <div class="jeitos">
+      <div class="jeito velho aparece">
+        <h3>O jeito antigo</h3>
+        <p class="jt-sub">Planilha de custos, peça por peça.</p>
+        <ul>
+          <li><i aria-hidden="true">✕</i><span>Medir os ml de resina de cada impressão</span></li>
+          <li><i aria-hidden="true">✕</i><span>Anotar hora por hora de pintura</span></li>
+          <li><i aria-hidden="true">✕</i><span>Somar tinta, verniz, lixa e primer</span></li>
+          <li><i aria-hidden="true">✕</i><span>Lembrar de taxa, embalagem e extras</span></li>
+          <li><i aria-hidden="true">✕</i><span>Refazer tudo no próximo orçamento</span></li>
+        </ul>
+        <p class="jt-tempo"><b>Toda vez do zero</b><small>e o cliente esperando</small></p>
+      </div>
+      <div class="jeito novo aparece">
+        <h3>O jeito FigPrice</h3>
+        <p class="jt-sub">Você ensina uma vez. Ele repete sempre.</p>
+        <ul>
+          <li><i aria-hidden="true">✓</i><span>Calibre com 3 a 5 peças que você já vendeu</span></li>
+          <li><i aria-hidden="true">✓</i><span>Seus custos e seu trabalho já ficam dentro do seu preço</span></li>
+          <li><i aria-hidden="true">✓</i><span>Peça nova? Só marcar o que ela tem</span></li>
+          <li><i aria-hidden="true">✓</i><span>Embalagem e taxa da maquininha já entram na conta</span></li>
+          <li><i aria-hidden="true">✓</i><span>Mesmo critério em todas as peças</span></li>
+        </ul>
+        <p class="jt-tempo"><b>30 segundos</b><small>no celular</small></p>
+      </div>
+    </div>
+    <p class="jt-fecho aparece">O preço continua sendo o seu. <em>Só a trabalheira é que sai.</em></p>
+  </div>
+</section>
+
 <section id="comparar">
   <div class="wrap">
     <h2 class="aparece">Na cabeça, na planilha ou no FigPrice?</h2>
+    <p class="lead aparece">Medir ml de resina, contar hora por hora e somar tinta e verniz de cada peça é o jeito antigo: trabalhoso, e quase ninguém mantém. No FigPrice você ensina uma vez como cobra, e ele faz a conta de toda peça nova.</p>
     <div class="tabela-wrap aparece">
       <table>
         <thead><tr><th scope="col"></th><th scope="col">Cabeça</th><th scope="col">Planilha</th><th scope="col" class="fig">FigPrice</th></tr></thead>
         <tbody>
           <tr><td>Orçamento em segundos, no celular</td><td class="nao"><i aria-hidden="true">✕</i><span>Não</span></td><td class="meio"><i aria-hidden="true">~</i><span>Raramente</span></td><td class="fig sim"><i aria-hidden="true">✓</i><span>Sim</span></td></tr>
+          <tr><td>Sem medir resina, tinta e horas a cada peça</td><td class="sim"><i aria-hidden="true">✓</i><span>Sim</span></td><td class="nao"><i aria-hidden="true">✕</i><span>Mede tudo</span></td><td class="fig sim"><i aria-hidden="true">✓</i><span>Sim</span></td></tr>
+          <tr><td>Aprende o seu jeito de cobrar</td><td class="nao"><i aria-hidden="true">✕</i><span>Não</span></td><td class="nao"><i aria-hidden="true">✕</i><span>Não</span></td><td class="fig sim"><i aria-hidden="true">✓</i><span>Sim</span></td></tr>
           <tr><td>Lembra de embalagem, verniz e extras</td><td class="meio"><i aria-hidden="true">~</i><span>Às vezes</span></td><td class="meio"><i aria-hidden="true">~</i><span>Se você montar</span></td><td class="fig sim"><i aria-hidden="true">✓</i><span>Sim</span></td></tr>
           <tr><td>Mesmo critério em todas as peças</td><td class="nao"><i aria-hidden="true">✕</i><span>Não</span></td><td class="sim"><i aria-hidden="true">✓</i><span>Sim</span></td><td class="fig sim"><i aria-hidden="true">✓</i><span>Sim</span></td></tr>
           <tr><td>Mensagem pronta para o cliente</td><td class="nao"><i aria-hidden="true">✕</i><span>Não</span></td><td class="nao"><i aria-hidden="true">✕</i><span>Não</span></td><td class="fig sim"><i aria-hidden="true">✓</i><span>Sim</span></td></tr>
@@ -701,6 +770,8 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px}
     <details><summary>Funciona no iPhone?</summary><p>Sim. O FigPrice roda no navegador do celular, em Android e iPhone. Abra o link, toque em "Adicionar à tela inicial" e ele fica com ícone, como um app.</p></details>
     <details><summary>Como instalar para usar sem internet?</summary><p><b>Android (Chrome):</b> abra o app, toque nos três pontinhos ⋮ e em "Instalar app". Não use "Criar atalho", que não funciona sem internet.<br><b>iPhone (Safari):</b> abra o app, toque em Compartilhar (o quadrado com a seta para cima) e em "Adicionar à Tela de Início".<br>Depois, abra sempre pelo ícone. O próprio app também mostra esse passo a passo.</p></details>
     <details><summary>Precisa de internet?</summary><p>Só para ativar na primeira vez e para conferir a licença de tempos em tempos. No dia a dia, funciona sem internet.</p></details>
+    <details><summary>Preciso calcular resina, tinta e horas de trabalho?</summary><p>Não, e essa é a ideia. Calcular insumo por insumo é o jeito antigo: dá trabalho a cada peça, e no fim o grosso do preço de uma estátua pintada à mão nem é material, é o seu tempo e a sua mão. No FigPrice você calibra uma vez com peças que já vendeu, e os seus custos e o seu trabalho já ficam dentro dos seus preços. Dali em diante é só marcar o que a peça tem. O que pesa de verdade tem campo próprio: embalagem, tinta automotiva e taxa da maquininha.</p></details>
+    <details><summary>O app decide o preço por mim?</summary><p>Não. O preço é seu. O FigPrice aprende como você cobra e repete o mesmo critério em cada peça nova, sem esquecer nada. Quer cobrar mais ou menos? É só mudar os seus valores.</p></details>
     <details><summary>Os valores servem para o meu estúdio?</summary><p>Você escolhe: comece com os valores sugeridos, que vêm de um estúdio em atividade, ou calibre o app com 3 a 5 peças que você já vendeu. Todos os valores também podem ser editados um por um.</p></details>
     <details><summary>Como recebo depois de comprar?</summary><p>Assim que o pagamento é aprovado, chega no seu e-mail o link do app e o código de ativação.</p></details>
     <details><summary>Em quantos aparelhos posso usar?</summary><p>Cada compra ativa até 2 aparelhos: o seu computador e o seu celular.</p></details>
