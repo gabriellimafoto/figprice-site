@@ -1,4 +1,4 @@
-const CACHE = "figprice-app-4.22";
+const CACHE = "figprice-app-5.0";
 const ARQUIVOS = ["./app", "./app-manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQUIVOS.map(u => new Request(u, {cache: "reload"})))));

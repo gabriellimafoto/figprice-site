@@ -130,6 +130,73 @@ dialog,.ac-corpo{overscroll-behavior:contain}
 .toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:9;font-weight:600}
 .check{display:flex;align-items:center;gap:8px;font-weight:600;margin-top:10px}
 .check input{width:auto}
+/* ===== 5.0: resumo ===== */
+.dash-heroi{display:flex;flex-direction:column;justify-content:space-between;gap:14px}
+.dh-topo{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.dash-heroi .dh-topo b{font-size:4.2rem;margin:0;color:var(--ouro)}
+.dh-topo strong{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.5rem;line-height:1.1}
+.dh-barra{display:flex;height:10px;border-radius:10px;overflow:hidden;background:#3a2a20;gap:2px}
+.dh-barra i{display:block;min-width:0}
+.dh-barra i.pro{background:linear-gradient(90deg,#c9952b,#f3d48b)}
+.dh-barra i.bas{background:var(--verde)}
+.dh-mini{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.dh-mini div{background:rgba(0,0,0,.25);border-radius:12px;padding:10px 12px;min-width:0}
+.dash-heroi .dh-mini b{font-size:1.5rem;margin:0}
+.dash-heroi .dh-mini span{display:block;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dh-mini .pro b{color:var(--ouro)}.dh-mini .bas b{color:var(--verde)}.dh-mini .sai b{color:#ffcf9a}
+.dash{margin-bottom:18px;display:grid;gap:12px}
+.dash-topo{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px}
+@media (max-width:760px){.dash-topo{grid-template-columns:1fr}}
+.dash-heroi{text-align:left;background:linear-gradient(135deg,#2e2014,#241912);border:1px solid var(--ouro);border-radius:18px;padding:18px 20px;color:var(--ink);font:inherit;cursor:pointer;min-width:0}
+.dash-heroi small{display:block;color:var(--ouro);font-weight:800;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+.dash-heroi b{display:block;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:3.2rem;line-height:1.05;margin:4px 0}
+.dash-heroi span{color:var(--muted);font-size:.92rem}
+.dash-heroi[aria-pressed="true"],.dash-c[aria-pressed="true"]{outline:2px solid var(--verde);outline-offset:1px}
+.dash-din{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;min-width:0}
+.dash-din h3{margin:0 0 8px;font-size:.72rem;color:var(--ouro);letter-spacing:.1em;text-transform:uppercase}
+.dash-din .l{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed #3a2a20;font-size:.92rem}
+.dash-din .l:last-of-type{border-bottom:0}
+.dash-din .l span{color:var(--muted);min-width:0}
+.dash-din .l b{white-space:nowrap}
+.dash-din .l.liq b{color:var(--verde);font-size:1.1rem}
+.dash-din p{margin:8px 0 0;color:var(--muted);font-size:.8rem}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.dash-c{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--ink);font:inherit;cursor:pointer;min-width:0;transition:border-color .2s,transform .15s}
+.dash-c:hover{border-color:var(--muted)}
+.dash-c:active{transform:scale(.98)}
+.dash-c:disabled{opacity:.45;cursor:default}
+.dash-c b{display:block;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.7rem;line-height:1.1}
+.dash-c span{display:block;font-weight:700;font-size:.9rem}
+.dash-c small{display:block;color:var(--muted);font-size:.76rem;margin-top:2px}
+.dash-c.alerta b{color:var(--ouro)}
+.dash-c.ruim b{color:var(--vermelho)}
+.dash-c.bom b{color:var(--verde)}
+.dash-todas{background:none;border:0;color:var(--muted);font:inherit;font-size:.86rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer;justify-self:start;padding:2px 0}
+.tag.manual{background:#33303a;color:#d6cfee;vertical-align:2px}
+.tag.cancelou{background:#4a2f1c;color:#ffcf9a;vertical-align:2px}
+.abas-m{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.abas-m button{background:var(--fundo);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font:inherit;font-size:.88rem;color:var(--ink);cursor:pointer}
+.abas-m button[aria-selected="true"]{background:var(--ouro);border-color:var(--ouro);color:#2a2420;font-weight:700}
+.abas-m button i{font-style:normal;opacity:.7;margin-left:4px}
+.ev{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:baseline;padding:8px 0;border-bottom:1px dashed #3a2a20;font-size:.9rem}
+.ev time{color:var(--muted);font-size:.8rem;white-space:nowrap}
+.ev .q{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev .q small{color:var(--muted)}
+.ev .v{white-space:nowrap;color:var(--muted)}
+.ev .t{font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:20px;background:#3a2a20;color:var(--muted);margin-right:6px}
+.ev .t.compra,.ev .t.renovacao,.ev .t.reativou{background:#1f4a43;color:#bfeee5}
+.ev .t.cancelou,.ev .t.atrasou{background:#4a2f1c;color:#ffcf9a}
+.ev .t.reembolso,.ev .t.contestou{background:#4a1f1c;color:#ffb3aa}
+.passos-info{margin:8px 6px 0;font-size:.84rem;color:var(--muted)}
+.passos-info b{color:var(--verde)}
+.passos-dia{position:sticky;top:0;background:var(--card);padding:8px 0 4px;margin-top:8px;color:var(--ouro);font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;z-index:1}
+.ps{display:grid;grid-template-columns:62px minmax(0,1fr);gap:0 10px;padding:5px 0;border-bottom:1px dashed #33261c;font-size:.9rem}
+.ps time{color:var(--muted);font-size:.78rem;padding-top:2px}
+.ps span{min-width:0;overflow-wrap:anywhere}
+.ps span i{font-style:normal;color:var(--muted)}
+.ps.erro span{color:var(--vermelho)}
+.ps.abriu span{color:var(--verde);font-weight:700}
+.ps.tela span b{font-weight:700}
 </style>
 </head>
 <body>
@@ -153,7 +220,7 @@ dialog,.ac-corpo{overscroll-behavior:contain}
   </section>
 
   <section id="telaPainel" hidden>
-    <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ouro" id="abrirNova">+ Nova licença</button><button class="btn" id="abrirReemb">Reembolsos e motivos</button><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
+    <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ouro" id="abrirNova">+ Nova licença</button><button class="btn" id="abrirReemb">Movimento</button><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
     <p class="carregando" id="carregando" hidden>Atualizando…</p>
     <div class="stats card" id="stats"></div>
     <dialog id="dlgNova">
@@ -223,36 +290,102 @@ async function carregar(){
   $("carregando").hidden = false; if (dados.length) $("lista").classList.add("velha");
   try{ const j = await api({acao: "admin_listar"}); if (!j.ok){ toast(j.erro || "Erro ao carregar"); return; } dados = j.licencas; try{ localStorage.setItem("ff_admin_cache", JSON.stringify(dados)); }catch(_){} desenhar(); }
   catch(e){ toast("Sem conexão com a planilha"); }
-  finally{ $("carregando").hidden = true; $("lista").classList.remove("velha"); carregarReemb(); carregarFeedback().catch(() => {}); }
+  finally{ $("carregando").hidden = true; $("lista").classList.remove("velha"); carregarReemb(); carregarFeedback().catch(() => {}); carregarResumo(); }
 }
-const FILTROS = [["todas", "Todas"], ["ativo", "Ativas"], ["vencendo", "Vencendo em 7 dias"], ["vencida", "Vencidas"], ["bloqueado", "Bloqueadas"]];
+/* (5.0) quem é quem. manual = criada no admin (pedido "painel") ou sem pedido de compra; pagante = ativa e veio de uma compra;
+   assinante = pagante com prazo (mensal ou anual). Cortesia e teste nunca viram assinatura sozinhos. */
+const manual = l => { const p = String(l.pedido || "").trim(); return !p || p === "painel"; };
+const pagante = l => situacao(l) === "ativo" && !manual(l);
+const assinante = l => pagante(l) && !!l.validoAte;
+const cancelouRenov = l => !!String(l.cancelado || "").trim();
+const testando = l => situacao(l) === "ativo" && l.proTipo === "teste" && !!l.proAte && Date.now() < l.proAte;
+const proPago = l => /^(pro|upgrade)/.test(String(l.proTipo || "")) && !!l.proAte && Date.now() < l.proAte;
+/* quanto essa licença rende por mês se continuar renovando (anual dividido por 12). Renovação cancelada não conta. */
+function receitaMensal(l){
+  if (!assinante(l)) return 0;
+  const canc = String(l.cancelado || "").split(","), tp = String(l.proTipo || ""); let v = 0;
+  if (/^pro /.test(tp) && proPago(l)){ if (!canc.includes("pro")) v += /anual/.test(tp) ? 399 / 12 : 39.9; }
+  else {
+    if (!canc.includes("basico")) v += l.plano === "anual" ? 199 / 12 : 19.9;
+    if (/^upgrade/.test(tp) && proPago(l) && !canc.includes("upgrade")) v += /anual/.test(tp) ? 200 / 12 : 20;
+  }
+  return v;
+}
+let resumo = null;
+try{ resumo = JSON.parse(localStorage.getItem("ff_admin_resumo") || "null"); }catch(_){}
+async function carregarResumo(){
+  try{ const j = await api({acao: "admin_resumo"});
+    if (j && j.ok){ resumo = j; try{ localStorage.setItem("ff_admin_resumo", JSON.stringify(j)); }catch(_){} desenhar(); if ($("dlgReemb").open) abrirReemb(); }
+    else if (!resumo){ resumo = {v: 0, eventos: []}; }
+  }catch(_){}
+}
+const FILTROS = [];
 let FILTRO_FN = null;
 function desenhar(){
   localStorage.setItem("ff_admin_filtro", filtro); /* lembra o último filtro escolhido */
-  const ativos = dados.filter(l => situacao(l) === "ativo");
-  const vencendo = ativos.filter(l => l.validoAte && l.validoAte - Date.now() < 7 * DIA);
-  /* (09/11) os números do topo SÃO os filtros: tocar filtra a lista; tocar de novo volta para todas */
+  /* (5.0) RESUMO: o que importa em números grandes; cada número É um filtro da lista (tocar de novo volta para todas).
+     Conta criada à mão no admin (pedido "painel") NÃO é assinatura, mesmo com prazo: fica em "cortesias e contas manuais". */
+  const reativaram = new Set(((resumo && resumo.eventos) || []).filter(e => e.tipo === "reativou").map(e => String(e.email).toLowerCase()));
   const F = {
     ativo: l => situacao(l) === "ativo",
+    assinante: assinante,
+    cancelou: l => assinante(l) && cancelouRenov(l),
+    reativou: l => reativaram.has(String(l.email).toLowerCase()),
+    manual: l => situacao(l) === "ativo" && manual(l),
+    comprada: l => pagante(l) && !l.validoAte,
+    teste: testando,
     pro: l => !!l.pro && situacao(l) === "ativo",
     basico: l => !l.pro && situacao(l) === "ativo",
-    vitalicia: l => situacao(l) === "ativo" && !l.validoAte,
-    assinatura: l => situacao(l) === "ativo" && !!l.validoAte,
     vencendo: l => situacao(l) === "ativo" && l.validoAte && l.validoAte - Date.now() < 7 * DIA,
     vencida: l => situacao(l) === "vencida",
     bloqueado: l => situacao(l) === "bloqueado",
     reembolsada: l => situacao(l) === "reembolsada" || situacao(l) === "contestada"
   };
+  if (!F[filtro]) filtro = "todas";
   FILTRO_FN = F[filtro] || null;
-  $("stats").innerHTML = '<div class="resumo-total" role="button" tabindex="0"><b></b><span>licenças no total</span></div><div class="resumo-linha"></div>';
-  const tot = $("stats").querySelector(".resumo-total"); tot.querySelector("b").textContent = dados.length; tot.setAttribute("aria-pressed", String(filtro === "todas"));
-  tot.onclick = () => { filtro = "todas"; desenhar(); };
-  const linha = $("stats").querySelector(".resumo-linha");
-  [["ativo", "ativas"], ["pro", "Pro"], ["basico", "básico"], ["vitalicia", "vitalícias"], ["assinatura", "assinaturas"], ["vencendo", "vencendo em 7 dias", true], ["vencida", "vencidas"], ["bloqueado", "bloqueadas"], ["reembolsada", "reembolsadas"]]
-    .forEach(([id, nome, alerta]) => { const n = dados.filter(F[id]).length; if (!n && filtro !== id && (id === "vencida" || id === "reembolsada")) return;
-      const b = document.createElement("button"); b.type = "button"; if (alerta && n) b.className = "alerta"; b.disabled = !n && filtro !== id;
-      b.setAttribute("aria-pressed", String(filtro === id)); const bb = document.createElement("b"); bb.textContent = n; b.append(bb, nome);
-      b.onclick = () => { filtro = filtro === id ? "todas" : id; desenhar(); }; linha.appendChild(b); });
+  const conta = id => dados.filter(F[id]).length;
+  const ass = dados.filter(assinante), nPro = ass.filter(l => l.pro && l.proTipo !== "teste").length, nAnual = ass.filter(l => l.plano === "anual").length;
+  const mensal = dados.reduce((t, l) => t + receitaMensal(l), 0);
+  const R$ = v => "R$ " + Number(v || 0).toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const E = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const alternar = id => { filtro = filtro === id ? "todas" : id; desenhar(); };
+  const box = $("stats"); box.className = "dash"; box.textContent = "";
+  const heroi = E("button", "dash-heroi"); heroi.type = "button"; heroi.setAttribute("aria-pressed", String(filtro === "assinante"));
+  const hTopo = E("div", "dh-topo"); hTopo.append(E("b", "", String(ass.length)), E("strong", "", ass.length === 1 ? "assinante ativo" : "assinantes ativos"));
+  const nBas = ass.length - nPro, hBarra = E("div", "dh-barra");
+  if (ass.length){ const a = E("i", "pro"); a.style.flexGrow = nPro; const b = E("i", "bas"); b.style.flexGrow = nBas; hBarra.append(a, b); }
+  const hMini = E("div", "dh-mini"); [[nPro, "Pro", "pro"], [nBas, "Básico", "bas"], [nAnual, "no anual", ""], [ass.filter(cancelouRenov).length, "vão sair", "sai"]].forEach(([k, t, c]) => { const m = E("div", c); m.append(E("b", "", String(k)), E("span", "", t)); hMini.appendChild(m); });
+  heroi.append(hTopo, hBarra, hMini);
+  if (!ass.length) heroi.append(E("span", "", "Ninguém pagando ainda. Contas de teste e cortesias aparecem abaixo."));
+  heroi.onclick = () => alternar("assinante");
+  const din = E("div", "dash-din"); din.append(E("h3", "", "Dinheiro"));
+  const linhaD = (rot, val, cls) => { const l = E("div", "l" + (cls ? " " + cls : "")); l.append(E("span", "", rot), E("b", "", val)); return l; };
+  din.append(linhaD("Receita mensal estimada", R$(mensal)));
+  const dm = resumo && resumo.dinheiro;
+  if (dm && dm.mes){
+    din.append(linhaD("Vendido este mês (" + dm.mes.vendas + (dm.mes.vendas === 1 ? " pagamento)" : " pagamentos)"), R$(dm.mes.bruto)), linhaD("Taxas da Stripe", "− " + R$(dm.mes.taxas)));
+    if (dm.mes.devolvido) din.append(linhaD("Devolvido (reembolsos)", "− " + R$(dm.mes.devolvido)));
+    din.append(linhaD("Líquido este mês", R$(dm.mes.liquido), "liq"));
+    if (dm.anterior) din.append(linhaD("Líquido do mês passado", R$(dm.anterior.liquido)));
+    din.append(E("p", "", "Estimada = soma dos planos de quem está com a renovação ligada (anual dividido por 12). Os outros valores vêm direto da Stripe."));
+  } else din.append(E("p", "", resumo && resumo.v ? "A chave da Stripe não deixou ler o saldo (precisa da permissão de leitura em Saldo). O resto funciona normal." : "Estimada = soma dos planos de quem está com a renovação ligada (anual dividido por 12). Vendido, taxas e líquido do mês aparecem aqui depois de atualizar o script para a v25."));
+  const topo = E("div", "dash-topo"); topo.append(heroi, din);
+  const grid = E("div", "dash-grid");
+  const temResumo = !!(resumo && resumo.v);
+  [["cancelou", "renovação cancelada", "usam até o fim do período pago", "alerta"],
+   ["reativou", "voltaram atrás", temResumo ? "cancelaram e religaram (90 dias)" : "aparece com o script v25", "bom"],
+   ["reembolsada", "reembolsadas", "devolvidas ou contestadas", "ruim"],
+   ["vencendo", "vencendo em 7 dias", "anual ou renovação cancelada", "alerta"],
+   ["teste", "testando o Pro", "teste grátis de 7 dias", ""],
+   ["manual", "cortesias e contas manuais", "criadas no admin: não são assinatura", ""],
+   ["comprada", "vitalícias compradas", "compra antiga, sem mensalidade", ""],
+   ["vencida", "vencidas", "passaram da validade", ""],
+   ["bloqueado", "bloqueadas", "", ""]
+  ].forEach(([id, nome, sub, cls]) => { const k = conta(id); if (!k && filtro !== id && ["comprada", "vencida", "bloqueado", "teste"].includes(id)) return;
+    const b = E("button", "dash-c" + (k && cls ? " " + cls : "")); b.type = "button"; b.disabled = !k && filtro !== id; b.setAttribute("aria-pressed", String(filtro === id));
+    b.append(E("b", "", id === "reativou" && !temResumo ? "–" : String(k)), E("span", "", nome)); if (sub) b.append(E("small", "", sub)); b.onclick = () => alternar(id); grid.appendChild(b); });
+  const todas = E("button", "dash-todas", filtro === "todas" ? dados.length + " licenças no total (contando testes, cortesias e antigas)" : "Mostrando um filtro · tocar para ver todas as " + dados.length + " licenças"); todas.type = "button"; todas.onclick = () => { filtro = "todas"; desenhar(); };
+  box.append(topo, grid, todas);
 
   const q = $("busca").value.trim().toLowerCase();
   const lista = dados.filter(l => {
@@ -268,6 +401,8 @@ function desenhar(){
     cab.innerHTML = '<div><div class="nm"></div><div class="em"></div></div><span class="tag ' + s + '"></span>';
     cab.querySelector(".nm").textContent = l.nome || l.email;
     { const pr = document.createElement("span"); pr.className = "tag " + (l.pro ? "pro" : "basico"); pr.textContent = l.pro ? (l.cortesia ? "PRO cortesia" : l.proTipo === "teste" ? "PRO teste" : "PRO") : "BÁSICO"; cab.querySelector(".nm").append(" ", pr); }
+    if (manual(l) && s === "ativo"){ const mn = document.createElement("span"); mn.className = "tag manual"; mn.textContent = l.cortesia ? "cortesia" : "manual"; mn.title = "Criada no admin: não conta como assinatura"; cab.querySelector(".nm").append(" ", mn); }
+    if (cancelouRenov(l) && s === "ativo"){ const cn = document.createElement("span"); cn.className = "tag cancelou"; cn.textContent = "renovação cancelada"; cab.querySelector(".nm").append(" ", cn); }
     /* país do cliente (pelo cartão da Stripe): só aparece quando NÃO é do Brasil */
     if (l.pais && l.pais !== "BR"){ const pa = document.createElement("span"); pa.className = "tag pais"; pa.textContent = bandeira(l.pais) + " " + nomePais(l.pais); cab.querySelector(".nm").append(" ", pa); }
     cab.querySelector(".em").textContent = (l.nome ? l.email + " · " : "") + "código " + l.codigo;
@@ -317,7 +452,7 @@ function menuLic(l, hl, excluir){
   const d = $("dlgAcoes"), s = situacao(l);
   const svg = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICO[k] + '</svg>';
   const fechar = () => d.close();
-  const rodar = async (fn, ok) => { fechar(); try{ const j = await fn(); if (j && j.ok === false) toast(j.erro || "Não deu certo"); else { toast(ok); await carregar(); } }catch(_){ toast("Sem conexão"); } };
+  const rodar = async (fn, ok) => { fechar(); try{ const j = await fn(); if (j && j.ok === false) toast(j.erro || "Não deu certo"); else { toast(typeof ok === "function" ? ok(j) : ok); await carregar(); } }catch(_){ toast("Sem conexão"); } };
   const item = (ico, txt, sub, fn, cls) => { const b = document.createElement("button"); b.type = "button"; b.className = "ac-item " + (cls || ""); b.innerHTML = svg(ico) + "<span></span>"; b.querySelector("span").textContent = txt; if (sub){ const sm = document.createElement("small"); sm.textContent = sub; b.querySelector("span").append(document.createElement("br"), sm); } b.onclick = fn; return b; };
   const div = t => { const e = document.createElement("div"); e.className = "ac-div"; e.textContent = t; return e; };
   const topo = document.createElement("div"); topo.className = "ac-topo"; topo.innerHTML = "<b></b><small></small>";
@@ -338,7 +473,10 @@ function menuLic(l, hl, excluir){
     div("Acesso"), grupo(
     s === "bloqueado" ? item("ativ", "Desbloquear", "volta a funcionar na hora", () => rodar(() => api({acao: "admin_status", email: l.email, status: "ativo"}), "Desbloqueada"))
       : item("bloq", "Bloquear", "o app para de funcionar", () => rodar(() => api({acao: "admin_status", email: l.email, status: "bloqueado"}), "Bloqueada"), "perigo"),
-    item("mais", "Dar mais 30 dias", l.validoAte ? "vale até " + dataBR(l.validoAte + 30 * DIA) : "", () => rodar(() => api({acao: "admin_validade", email: l.email, dias: 30}), "+30 dias")),
+    item("mais", "Dar mais 30 dias", (l.validoAte ? "vale até " + dataBR(Math.max(Date.now(), l.validoAte) + 30 * DIA) + " · " : "") + "a cobrança na Stripe também é adiada", () => rodar(() => api({acao: "admin_validade", email: l.email, dias: 30}),
+      j => j.stripe === "adiada" ? "+30 dias · próxima cobrança na Stripe adiada 30 dias" : j.stripe === "erro" ? "+30 dias na licença, MAS a Stripe não adiou a cobrança: " + (j.stripeErro || "erro") : j.stripe === "sem" ? "+30 dias (sem assinatura ativa na Stripe para adiar)" : "+30 dias na licença (a Stripe só é adiada com o script v25)")),
+    l.validoAte && !manual(l) ? item("mais", "Alinhar a cobrança da Stripe", "para quem ganhou dias antes: cobra só em " + dataBR(l.validoAte - 5 * DIA), () => rodar(() => api({acao: "admin_alinhar", email: l.email}),
+      j => j.n ? "Pronto: a Stripe só cobra em " + dataBR(j.ate) : j.ja ? "Já estava certo: a Stripe cobra nessa data ou depois" : "Não achei assinatura ativa na Stripe (ou o script ainda não é o v25)")) : "",
     l.validoAte ? item("infi", "Tornar vitalícia", "nunca vence", () => rodar(() => api({acao: "admin_validade", email: l.email, dias: 0}), "Agora é vitalícia")) : "",
     Number(l.aparelhos) ? item("cel", "Liberar aparelhos", l.aparelhos + " de 2 em uso", () => rodar(() => api({acao: "admin_liberar", email: l.email}), "Aparelhos liberados")) : ""),
     div("Pro"), grupo(
@@ -352,7 +490,7 @@ function menuLic(l, hl, excluir){
       sim.onclick = async () => { fechar(); try{ const j = await api({acao: "admin_novo_codigo", email: l.email, enviar: "1"}); if (j.ok){ toast("Novo código: " + j.codigo + " (enviado)"); await carregar(); } else toast(j.erro); }catch(_){ toast("Sem conexão"); } };
       cf.querySelector(".btns").append(nao, sim); d.replaceChildren(topo, cf); })),
     div("Suporte"), grupo(
-    item("hist", "Ver passos no app", "o que a pessoa abriu e tocou (últimos 3 dias)", () => verPassos(l))),
+    item("hist", "Ver passos no app", "o que a pessoa abriu e tocou, quase em tempo real", () => verPassos(l))),
     Object.assign(document.createElement("div"), {className: "ac-sep"}),
     item("lixo", "Excluir licença", "dá para recuperar na aba Excluidas", confirmarExcluir, "perigo"));
   d.replaceChildren(topo, corpo);
@@ -371,24 +509,47 @@ function idiomaDe(tela){
   const br = lg === "pt";
   return {br, txt: band + " Aparelho em " + nome + (br ? "" : " · a tela dele aparece traduzida; aqui os passos vêm em português")};
 }
+/* (5.0) PASSOS NO APP: uma linha do tempo só (junta todos os envios, sem repetir), em frases, mais novo em cima,
+   e que se atualiza sozinha a cada 20 s enquanto a janela está aberta. O app 5.0 manda os passos novos a cada minuto de uso
+   e quando a pessoa sai do app; versões antigas mandavam 1 vez por dia (por isso o registro parecia parar no meio). */
+let passosTimer = null;
+const PASSO_ROT = {toque: "Tocou em", tela: "Abriu a tela", popup: "Apareceu a janela", aviso: "Aviso na tela", abriu: "Abriu o app", rede: "Internet", drive: "Google Drive", oferta: "Oferta mostrada", precos: "Preços", ERRO: "ERRO"};
+const passoTexto = t => String(t || "").replace(/#/g, "…").replace(/\[nome\]/g, "(nome)").replace(/\[e-mail\]/g, "(e-mail)");
+function haQuanto(t){ const s = Math.max(0, Math.round((Date.now() - t) / 1000)); return s < 60 ? "agora mesmo" : s < 3600 ? "há " + Math.round(s / 60) + " min" : s < 86400 ? "há " + Math.round(s / 3600) + " h" : "há " + Math.round(s / 86400) + " dias"; }
 async function verPassos(l){
-  const d = $("dlgAcoes");
-  const cab = document.createElement("div"); cab.className = "ac-topo"; cab.innerHTML = "<b>Passos no app</b><small></small>"; cab.querySelector("small").textContent = l.email; cab.append(botaoX(d));
-  const corpo = document.createElement("div"); corpo.className = "ac-corpo"; corpo.textContent = "Carregando…";
-  d.replaceChildren(cab, corpo); if (!d.open) d.showModal();
-  try{ const j = await api({acao: "admin_logs", email: l.email}); corpo.textContent = "";
-    if (!j.ok || !j.envios.length){ corpo.textContent = "Nenhum registro nos últimos 3 dias. O app envia quando dá erro, quando a pessoa relata um problema e 1 vez por dia."; return; }
-    j.envios.forEach(e => {
-      const t = document.createElement("div"); t.className = "ac-div"; const idi = idiomaDe(e.tela); t.textContent = new Date(e.data).toLocaleString("pt-BR", {dateStyle: "short", timeStyle: "short"}) + " · " + e.motivo + " · v" + e.versao + " · " + String(e.tela || "").split(" ")[0]; corpo.appendChild(t);
-      if (idi){ const b = document.createElement("div"); b.className = "idioma" + (idi.br ? "" : " fora"); b.textContent = idi.txt; corpo.appendChild(b); }
-      let passos = []; try{ passos = JSON.parse(e.log); }catch(_){}
-      const box = document.createElement("div"); box.className = "hist";
-      passos.slice(-120).reverse().forEach(p => { const r = document.createElement("div"); r.className = "hist-l" + (p[1] === "ERRO" ? " erro" : "");
-        const h = document.createElement("span"); h.textContent = new Date(p[0]).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit"});
-        const b = document.createElement("b"); b.textContent = p[1]; const sm = document.createElement("small"); sm.textContent = p[2]; r.append(h, b, sm); box.appendChild(r); });
-      corpo.appendChild(box);
+  const d = $("dlgAcoes"); clearInterval(passosTimer);
+  const cab = document.createElement("div"); cab.className = "ac-topo"; cab.innerHTML = "<b>Passos no app</b><small></small>"; cab.querySelector("small").textContent = (l.nome ? l.nome + " · " : "") + l.email; cab.append(botaoX(d));
+  const info = document.createElement("div"); info.className = "passos-info"; info.textContent = "Carregando…";
+  const corpo = document.createElement("div"); corpo.className = "ac-corpo";
+  d.replaceChildren(cab, info, corpo); if (!d.open) d.showModal();
+  let assinatura = "";
+  const pintar = j => {
+    if (!j.ok || !j.envios.length){ info.textContent = ""; corpo.textContent = "Nenhum registro ainda. O app manda os passos a cada minuto de uso e quando a pessoa sai dele. Se ela ainda usa uma versão antiga (antes da 5.0), o envio é só 1 vez por dia: peça para fechar e abrir o app de novo para atualizar."; return; }
+    const mapa = new Map();
+    j.envios.forEach(e => { let ps = []; try{ ps = JSON.parse(e.log); }catch(_){} ps.forEach(p => { if (Array.isArray(p)) mapa.set(p[0] + "|" + p[1] + "|" + p[2], p); }); });
+    const passos = [...mapa.values()].sort((a, b) => b[0] - a[0]).slice(0, 2000);
+    const novo = j.envios[0], sig = passos.length + "|" + (passos[0] ? passos[0][0] : 0) + "|" + novo.data;
+    const idi = idiomaDe(novo.tela);
+    info.textContent = ""; const vivo = document.createElement("b"); vivo.textContent = "● ao vivo";
+    info.append(vivo, " · último envio " + haQuanto(novo.data) + " · FigPrice " + novo.versao + " · tela " + String(novo.tela || "").split(" ")[0] + (idi && !idi.br ? " · " + idi.txt : "") + " · " + passos.length + " passos");
+    if (sig === assinatura) return; assinatura = sig;
+    const rol = corpo.scrollTop; corpo.textContent = "";
+    let diaAtual = "";
+    const hoje = new Date().toDateString(), ontem = new Date(Date.now() - DIA).toDateString();
+    passos.forEach(p => {
+      const dt = new Date(p[0]), dia = dt.toDateString();
+      if (dia !== diaAtual){ diaAtual = dia; const h = document.createElement("div"); h.className = "passos-dia"; h.textContent = dia === hoje ? "Hoje" : dia === ontem ? "Ontem" : dt.toLocaleDateString("pt-BR", {weekday: "long", day: "2-digit", month: "2-digit"}); corpo.appendChild(h); }
+      const r = document.createElement("div"); r.className = "ps " + (p[1] === "ERRO" ? "erro" : p[1]);
+      const tm = document.createElement("time"); tm.textContent = dt.toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit", second: "2-digit"});
+      const sp = document.createElement("span"), rot = document.createElement("i"); rot.textContent = (PASSO_ROT[p[1]] || p[1]) + (p[1] === "abriu" ? "" : ": ");
+      const tx = document.createElement(p[1] === "tela" ? "b" : "span"); tx.textContent = p[1] === "abriu" ? " · " + passoTexto(p[2]) : passoTexto(p[2]);
+      sp.append(rot, tx); r.append(tm, sp); corpo.appendChild(r);
     });
-  }catch(_){ corpo.textContent = "Sem conexão."; }
+    corpo.scrollTop = rol;
+  };
+  const buscar = async () => { try{ pintar(await api({acao: "admin_logs", email: l.email})); }catch(_){ if (!assinatura) corpo.textContent = "Sem conexão."; } };
+  await buscar();
+  passosTimer = setInterval(() => { if (!d.open || !document.body.contains(corpo)){ clearInterval(passosTimer); return; } buscar(); }, 20000);
 }
 async function verHistorico(l, hl){
   hl.hidden = false; hl.textContent = "Carregando…";
@@ -413,59 +574,89 @@ async function carregarReemb(){
     if (n){ const s = document.createElement("span"); s.className = "n"; s.textContent = n; b.appendChild(s); }
   }catch(_){}
 }
+/* (5.0) MOVIMENTO: tudo que aconteceu, em abas. Antes era "Reembolsos e motivos" (quase sempre vazio e sem cancelamentos:
+   para ver quem cancelou tinha que abrir a Stripe). Abas: Tudo (linha do tempo de 90 dias), Cancelamentos, Reembolsos, Motivos. */
+let abaMov = "tudo";
 function abrirReemb(){
   const d = $("dlgReemb"), fechar = () => d.close();
-  const cab = document.createElement("div"); cab.className = "dlg-cab"; cab.innerHTML = '<h2>Reembolsos e motivos</h2><button class="fechar" aria-label="Fechar">×</button>'; cab.querySelector("button").onclick = fechar;
-  const corpo = document.createElement("div"); corpo.style.cssText = "max-height:70vh;overflow:auto";
-  if (!reembolsos.length){ const p = document.createElement("p"); p.className = "nota"; p.textContent = "Nenhum pedido de reembolso. Quando um cliente pedir pelo app (Seu plano > Pedir reembolso), aparece aqui e você recebe um e-mail. Devolver também cancela a assinatura daquele produto (a Stripe não cobra de novo) e a licença fica Reembolsada."; corpo.appendChild(p); }
-  reembolsos.forEach(x => {
-    const it = document.createElement("div"); it.className = "re-item";
-    const t = document.createElement("b"); t.textContent = (x.nome || x.email); const st = document.createElement("span"); st.className = "re-st " + x.status; st.textContent = x.status; t.appendChild(st);
-    const s1 = document.createElement("small"); s1.textContent = x.email + (x.produto ? " · " + x.produto : "");
-    const s2 = document.createElement("small");
-    s2.textContent = (x.valor ? "R$ " + Number(x.valor).toFixed(2).replace(".", ",") + " pago em " + dataBR(x.pagoEm) : "pagamento não encontrado") + " · pediu em " + dataBR(x.data);
-    const pr = document.createElement("small"); pr.textContent = x.noPrazo ? "Dentro dos 7 dias da garantia" : "Fora do prazo de 7 dias: você decide"; if (!x.noPrazo) pr.className = "re-prazo";
-    it.append(t, s1, s2, pr);
-    if (x.motivo){ const m = document.createElement("p"); m.className = "re-mot"; m.textContent = "“" + x.motivo + "”"; it.appendChild(m); }
-    if (x.status === "pendente"){
-      const bs = document.createElement("div"); bs.className = "btns";
-      const rec = document.createElement("button"); rec.className = "btn"; rec.textContent = "Recusar";
-      const dev = document.createElement("button"); dev.className = "btn ouro"; dev.textContent = "Devolver " + (x.valor ? "R$ " + Number(x.valor).toFixed(2).replace(".", ",") : ""); dev.title = "Devolve o dinheiro pela Stripe e cancela a assinatura desse produto (não cobra de novo)";
-      const agir = async (acao, ok, b) => {
-        if (!b.dataset.ok){ b.dataset.ok = "1"; const t0 = b.textContent; b.textContent = "Toque de novo para confirmar"; setTimeout(() => { delete b.dataset.ok; b.textContent = t0; }, 4000); return; }
-        rec.disabled = dev.disabled = true;
-        try{ const j = await api({acao, linha: x.linha}); if (j.ok){ toast(ok); await carregarReemb(); abrirReemb(); carregar(); } else { toast(j.erro || "Não deu certo"); rec.disabled = dev.disabled = false; } }
-        catch(_){ toast("Sem conexão"); rec.disabled = dev.disabled = false; }
-      };
-      rec.onclick = () => agir("admin_recusar_reemb", "Pedido recusado", rec);
-      dev.onclick = () => agir("admin_reembolsar", "Dinheiro devolvido pela Stripe", dev);
-      bs.append(rec, dev); it.appendChild(bs);
-    } else if (x.resolvido){ const r = document.createElement("small"); r.textContent = (x.status === "devolvido" ? "Devolvido em " : "Recusado em ") + dataBR(x.resolvido); it.appendChild(r); }
-    corpo.appendChild(it);
-  });
-  /* motivos de quem cancelou, pediu reembolso ou quase saiu */
-  const mt = document.createElement("h3"); mt.textContent = "Motivos"; mt.style.cssText = "margin:18px 0 6px;font-size:1rem";
-  corpo.appendChild(mt);
-  const ml = document.createElement("div"); ml.className = "nota"; ml.textContent = "Carregando…"; corpo.appendChild(ml);
-  const pinta = j => {
-    ml.textContent = "";
-    if (!j.ok || !j.itens.length){ ml.textContent = "Ninguém cancelou nem quase saiu ainda."; return; }
-    j.itens.forEach(x => { const it = document.createElement("div"); it.className = "re-item";
-      const t = document.createElement("b"); t.textContent = x.motivo || "(sem motivo)";
-      const s1 = document.createElement("small"); s1.textContent = x.tipo + " · " + x.email + " · " + dataBR(x.data);
-      it.append(t, s1); if (x.texto && x.texto !== x.motivo){ const p = document.createElement("p"); p.className = "re-mot"; p.textContent = "“" + x.texto + "”"; it.appendChild(p); }
-      ml.appendChild(it); });
-  };
-  if (feedbacks) pinta(feedbacks);
-  carregarFeedback().then(j => { if (j) pinta(j); }).catch(() => { if (!feedbacks) ml.textContent = "Sem conexão."; });
-  d.replaceChildren(cab, corpo);
+  const E = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const R$ = v => "R$ " + Number(v || 0).toFixed(2).replace(".", ",");
+  const nomeDe = em => { const l = dados.find(x => String(x.email).toLowerCase() === String(em).toLowerCase()); return (l && l.nome) || em; };
+  const cab = E("div", "dlg-cab"); cab.innerHTML = '<h2>Movimento</h2><button class="fechar" aria-label="Fechar">×</button>'; cab.querySelector("button").onclick = fechar;
+  const eventos = (resumo && resumo.eventos) || [], temResumo = !!(resumo && resumo.v);
+  const pend = reembolsos.filter(x => x.status === "pendente").length;
+  const cancAgora = dados.filter(l => situacao(l) === "ativo" && cancelouRenov(l));
+  const abas = E("div", "abas-m"); abas.setAttribute("role", "tablist");
+  [["tudo", "Tudo", eventos.length], ["canc", "Cancelamentos", cancAgora.length], ["reemb", "Reembolsos", pend || reembolsos.length], ["motivos", "Motivos", feedbacks && feedbacks.itens ? feedbacks.itens.length : 0]].forEach(([id, nome, k]) => {
+    const b = E("button", "", nome); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(abaMov === id)); if (k) b.append(E("i", "", String(k))); b.onclick = () => { abaMov = id; abrirReemb(); }; abas.appendChild(b); });
+  const corpo = E("div"); corpo.style.cssText = "max-height:68vh;overflow:auto";
+  const vazio = t => corpo.appendChild(E("p", "nota", t));
+  const ROT = {compra: "Comprou", renovacao: "Renovou", cancelou: "Cancelou a renovação", reativou: "Religou a renovação", reembolso: "Reembolso", contestou: "Contestou no banco", atrasou: "Pagamento não passou", teste: "Começou o teste do Pro"};
+  const linhaEv = e => { const r = E("div", "ev");
+    const t = E("time", "", new Date(e.data).toLocaleDateString("pt-BR", {day: "2-digit", month: "2-digit"}) + " " + new Date(e.data).toLocaleTimeString("pt-BR", {hour: "2-digit", minute: "2-digit"}));
+    const q = E("span", "q"); q.append(E("span", "t " + e.tipo, ROT[e.tipo] || e.tipo), nomeDe(e.email)); if (e.detalhe) q.append(" ", E("small", "", "· " + e.detalhe)); q.title = e.email;
+    r.append(t, q, E("span", "v", e.valor ? R$(e.valor) : "")); return r; };
+
+  if (abaMov === "tudo"){
+    if (!temResumo) vazio("A linha do tempo (quem comprou, renovou, cancelou, religou e pediu reembolso) aparece aqui depois de atualizar o script para a v25. As outras abas já funcionam.");
+    else if (!eventos.length) vazio("Nada nos últimos 90 dias. Compras, renovações, cancelamentos e reembolsos aparecem aqui sozinhos.");
+    else {
+      const conta = tp => eventos.filter(e => e.tipo === tp && Date.now() - e.data < 30 * DIA).length;
+      corpo.appendChild(E("p", "nota", "Últimos 30 dias: " + conta("compra") + " compras · " + conta("renovacao") + " renovações · " + conta("cancelou") + " cancelamentos · " + conta("reativou") + " religaram · " + conta("reembolso") + " reembolsos."));
+      eventos.slice(0, 250).forEach(e => corpo.appendChild(linhaEv(e)));
+    }
+  } else if (abaMov === "canc"){
+    corpo.appendChild(E("p", "nota", "Cancelar a renovação NÃO corta o acesso: a pessoa usa até o fim do período que já pagou. Se ela religar a renovação, sai desta lista sozinha."));
+    if (!cancAgora.length) vazio("Ninguém está com a renovação cancelada agora.");
+    cancAgora.sort((a, b) => (a.validoAte || 0) - (b.validoAte || 0)).forEach(l => { const it = E("div", "re-item");
+      it.append(E("b", "", l.nome || l.email), E("small", "", l.email + " · cancelou: " + l.cancelado), document.createElement("br"),
+        E("small", "", l.validoAte ? "Acesso até " + dataBR(l.validoAte) + " (" + Math.max(0, Math.ceil((l.validoAte - Date.now()) / DIA)) + " dias)" : "Sem data de fim"));
+      corpo.appendChild(it); });
+    const hist = eventos.filter(e => e.tipo === "cancelou" || e.tipo === "reativou");
+    if (hist.length){ corpo.appendChild(E("h3", "", "Histórico (90 dias)")).style.cssText = "margin:18px 0 6px;font-size:1rem"; hist.slice(0, 120).forEach(e => corpo.appendChild(linhaEv(e))); }
+  } else if (abaMov === "reemb"){
+    corpo.appendChild(E("p", "nota", "Dentro dos 7 dias da compra (ou 48 h de uma renovação), o reembolso é automático: a Stripe devolve, a assinatura é cancelada e você só recebe o e-mail. Aqui ficam os pedidos FORA do prazo, para você decidir, e o registro dos que já foram feitos."));
+    if (!reembolsos.length) vazio("Nenhum pedido de reembolso até agora.");
+    reembolsos.forEach(x => {
+      const it = E("div", "re-item");
+      const t = E("b", "", x.nome || x.email); t.appendChild(E("span", "re-st " + x.status, x.status));
+      const s2 = E("small", "", (x.valor ? R$(x.valor) + " pago em " + dataBR(x.pagoEm) : "pagamento não encontrado") + " · pediu em " + dataBR(x.data));
+      const pr = E("small", x.noPrazo ? "" : "re-prazo", x.noPrazo ? "Dentro do prazo (automático)" : "Fora do prazo: você decide");
+      it.append(t, E("small", "", x.email + (x.produto ? " · " + x.produto : "")), s2, pr);
+      if (x.motivo) it.appendChild(E("p", "re-mot", "“" + x.motivo + "”"));
+      if (x.status === "pendente"){
+        const bs = E("div", "btns"), rec = E("button", "btn", "Recusar"), dev = E("button", "btn ouro", "Devolver " + (x.valor ? R$(x.valor) : ""));
+        dev.title = "Devolve o dinheiro pela Stripe e cancela a assinatura desse produto (não cobra de novo)";
+        const agir = async (acao, ok, b) => {
+          if (!b.dataset.ok){ b.dataset.ok = "1"; const t0 = b.textContent; b.textContent = "Toque de novo para confirmar"; setTimeout(() => { delete b.dataset.ok; b.textContent = t0; }, 4000); return; }
+          rec.disabled = dev.disabled = true;
+          try{ const j = await api({acao, linha: x.linha}); if (j.ok){ toast(ok); await carregarReemb(); abrirReemb(); carregar(); } else { toast(j.erro || "Não deu certo"); rec.disabled = dev.disabled = false; } }
+          catch(_){ toast("Sem conexão"); rec.disabled = dev.disabled = false; }
+        };
+        rec.onclick = () => agir("admin_recusar_reemb", "Pedido recusado", rec);
+        dev.onclick = () => agir("admin_reembolsar", "Dinheiro devolvido pela Stripe", dev);
+        bs.append(rec, dev); it.appendChild(bs);
+      } else if (x.resolvido) it.appendChild(E("small", "", (x.status === "devolvido" ? "Devolvido em " : "Recusado em ") + dataBR(x.resolvido)));
+      corpo.appendChild(it);
+    });
+  } else {
+    corpo.appendChild(E("p", "nota", "O que as pessoas escreveram ao cancelar, pedir reembolso ou quase sair."));
+    const j = feedbacks;
+    if (!j) vazio("Carregando…");
+    else if (!j.ok || !j.itens.length) vazio("Ninguém deixou motivo ainda.");
+    else j.itens.forEach(x => { const it = E("div", "re-item");
+      it.append(E("b", "", x.motivo || "(sem motivo)"), E("small", "", x.tipo + " · " + nomeDe(x.email) + " · " + dataBR(x.data)));
+      if (x.texto && x.texto !== x.motivo) it.appendChild(E("p", "re-mot", "“" + x.texto + "”"));
+      corpo.appendChild(it); });
+  }
+  d.replaceChildren(cab, abas, corpo);
   d.onclick = e => { if (e.target === d) fechar(); };
   if (!d.open) d.showModal();
 }
 /* abre NA HORA com o que já foi carregado junto da lista; depois atualiza por trás */
 let feedbacks = null;
 async function carregarFeedback(){ const j = await api({acao: "admin_feedback"}); if (j && j.ok) feedbacks = j; return j; }
-$("abrirReemb").onclick = () => { abrirReemb(); carregarReemb().then(() => { if ($("dlgReemb").open) abrirReemb(); }); };
+$("abrirReemb").onclick = () => { abrirReemb(); carregarReemb().then(() => { if ($("dlgReemb").open) abrirReemb(); }); carregarFeedback().then(() => { if ($("dlgReemb").open && abaMov === "motivos") abrirReemb(); }).catch(() => {}); };
 $("busca").oninput = desenhar;
 $("abrirNova").onclick = () => { $("dlgNova").showModal(); $("nNome").focus(); };
 $("fecharNova").onclick = () => $("dlgNova").close();
