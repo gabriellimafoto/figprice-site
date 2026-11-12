@@ -624,13 +624,15 @@ function abrirReemb(){
       const pr = E("small", x.noPrazo ? "" : "re-prazo", x.noPrazo ? "Dentro do prazo (automático)" : "Fora do prazo: você decide");
       it.append(t, E("small", "", x.email + (x.produto ? " · " + x.produto : "")), s2, pr);
       if (x.motivo) it.appendChild(E("p", "re-mot", "“" + x.motivo + "”"));
+      if (x.obs && x.status === "pendente") it.appendChild(E("small", "re-prazo", "Não foi sozinho porque: " + x.obs + (x.noPrazo ? ". Vou tentando de novo a cada 15 minutos." : "")));
+      else if (x.obs === "devolvido direto na Stripe") it.appendChild(E("small", "", "Você devolveu direto na Stripe"));
       if (x.status === "pendente"){
         const bs = E("div", "btns"), rec = E("button", "btn", "Recusar"), dev = E("button", "btn ouro", "Devolver " + (x.valor ? R$(x.valor) : ""));
         dev.title = "Devolve o dinheiro pela Stripe e cancela a assinatura desse produto (não cobra de novo)";
         const agir = async (acao, ok, b) => {
           if (!b.dataset.ok){ b.dataset.ok = "1"; const t0 = b.textContent; b.textContent = "Toque de novo para confirmar"; setTimeout(() => { delete b.dataset.ok; b.textContent = t0; }, 4000); return; }
           rec.disabled = dev.disabled = true;
-          try{ const j = await api({acao, linha: x.linha}); if (j.ok){ toast(ok); await carregarReemb(); abrirReemb(); carregar(); } else { toast(j.erro || "Não deu certo"); rec.disabled = dev.disabled = false; } }
+          try{ const j = await api({acao, linha: x.linha}); if (j.ok){ toast(j.aviso || ok); await carregarReemb(); abrirReemb(); carregar(); } else { toast(j.erro || "Não deu certo"); rec.disabled = dev.disabled = false; } }
           catch(_){ toast("Sem conexão"); rec.disabled = dev.disabled = false; }
         };
         rec.onclick = () => agir("admin_recusar_reemb", "Pedido recusado", rec);
