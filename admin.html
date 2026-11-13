@@ -47,6 +47,8 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 @media (max-width:420px){.lista{grid-template-columns:1fr}}
 .lic{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
 .lic .cab{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.lic .cab > .tag{white-space:nowrap;flex:none}
+.lic .cab > div{min-width:0}
 .lic .nm{font-weight:700;font-size:1.05rem;line-height:1.25;word-break:break-word}
 .lic .em{color:var(--muted);font-size:.8rem;word-break:break-all}
 .lic .info{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:.82rem}
@@ -173,7 +175,8 @@ dialog,.ac-corpo{overscroll-behavior:contain}
 .dash-c.bom b{color:var(--verde)}
 .dash-todas{background:none;border:0;color:var(--muted);font:inherit;font-size:.86rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer;justify-self:start;padding:2px 0}
 .tag.manual{background:#33303a;color:#d6cfee;vertical-align:2px}
-.tag.cancelou{background:#4a2f1c;color:#ffcf9a;vertical-align:2px}
+.tag.cancelou{background:transparent;color:var(--muted);border:1px solid #4a4540;vertical-align:2px;font-weight:700}
+.lic .cab > .tag.apagado{opacity:.4}
 .abas-m{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
 .abas-m button{background:var(--fundo);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font:inherit;font-size:.88rem;color:var(--ink);cursor:pointer}
 .abas-m button[aria-selected="true"]{background:var(--ouro);border-color:var(--ouro);color:#2a2420;font-weight:700}
@@ -277,6 +280,17 @@ $("entrar").onclick = async () => {
 $("lCodigo").onkeydown = e => { if (e.key === "Enter") $("entrar").click(); };
 $("sair").onclick = async () => { try{ await api({acao: "admin_sair"}); }catch(_){} esquecer(); try{ localStorage.removeItem("ff_admin_cache"); }catch(_){} mostrar(); };
 $("atualizar").onclick = () => carregar();
+/* 13/11 (Gabriel): selo com o plano + a situação financeira. "cancelado" = cancelou a renovação E o prazo pago já acabou (está sem acesso);
+   enquanto ainda tem dias pagos continua "ativo" com a etiqueta "renovação cancelada". */
+function seloSituacao(l, s){
+  const pro = l.cortesia || /^(pro|upgrade)/.test(String(l.proTipo || "")) || (l.pro && l.proTipo !== "teste");
+  const plano = pro ? "Pro" : "Básico";
+  if (s === "ativo") return (l.pro && l.proTipo !== "teste" ? "Pro" : "Básico") + " ativo"; /* agora: Pro que acabou e ficou no básico = Básico ativo */
+  if (s === "reembolsada") return plano + " estornado";
+  if (s === "contestada") return plano + " contestado";
+  if (s === "vencida") return plano + (cancelouRenov(l) ? " cancelado" : " vencido");
+  return plano + " bloqueado";
+}
 function situacao(l){
   const st = String(l.status).toLowerCase();
   if (st === "reembolsado") return "reembolsada"; /* v22: o motivo do bloqueio aparece no selo */
@@ -398,15 +412,18 @@ function desenhar(){
   lista.forEach(l => {
     const s = situacao(l), c = document.createElement("div"); c.className = "card lic";
     const cab = document.createElement("div"); cab.className = "cab";
-    cab.innerHTML = '<div><div class="nm"></div><div class="em"></div></div><span class="tag ' + s + '"></span>';
+    /* 13/11 (Gabriel): só 2 cores no selo: Pro dourado, Básico cinza; fora de "ativo" a mesma cor bem apagada */
+    const ehProSelo = /^Pro/.test(seloSituacao(l, s));
+    cab.innerHTML = '<div><div class="nm"></div><div class="em"></div></div><span class="tag ' + (ehProSelo ? "pro" : "basico") + (s === "ativo" ? "" : " apagado") + '"></span>';
     cab.querySelector(".nm").textContent = l.nome || l.email;
-    { const pr = document.createElement("span"); pr.className = "tag " + (l.pro ? "pro" : "basico"); pr.textContent = l.pro ? (l.cortesia ? "PRO cortesia" : l.proTipo === "teste" ? "PRO teste" : "PRO") : "BÁSICO"; cab.querySelector(".nm").append(" ", pr); }
+    /* 13/11: o plano já vai no selo da direita ("Pro ativo", "Básico estornado"); ao lado do nome só cortesia e teste */
+    if (l.pro && (l.cortesia || l.proTipo === "teste")){ const pr = document.createElement("span"); pr.className = "tag pro"; pr.textContent = l.cortesia ? "PRO cortesia" : "PRO teste"; cab.querySelector(".nm").append(" ", pr); }
     if (manual(l) && s === "ativo"){ const mn = document.createElement("span"); mn.className = "tag manual"; mn.textContent = l.cortesia ? "cortesia" : "manual"; mn.title = "Criada no admin: não conta como assinatura"; cab.querySelector(".nm").append(" ", mn); }
     if (cancelouRenov(l) && s === "ativo"){ const cn = document.createElement("span"); cn.className = "tag cancelou"; cn.textContent = "renovação cancelada"; cab.querySelector(".nm").append(" ", cn); }
     /* país do cliente (pelo cartão da Stripe): só aparece quando NÃO é do Brasil */
     if (l.pais && l.pais !== "BR"){ const pa = document.createElement("span"); pa.className = "tag pais"; pa.textContent = bandeira(l.pais) + " " + nomePais(l.pais); cab.querySelector(".nm").append(" ", pa); }
     cab.querySelector(".em").textContent = (l.nome ? l.email + " · " : "") + "código " + l.codigo;
-    cab.querySelector(":scope > .tag").textContent = ({ativo: "Ativa", vencida: "Vencida", reembolsada: "Reembolsada", contestada: "Contestada"})[s] || "Bloqueada";
+    cab.querySelector(":scope > .tag").textContent = seloSituacao(l, s);
     const info = document.createElement("div"); info.className = "info";
     const datas = document.createElement("span"); datas.textContent = "Desde " + dataBR(l.data) + " · " + (l.validoAte ? "válida até " + dataBR(l.validoAte) : "vitalícia") + (l.proTipo && l.proAte ? " · " + l.proTipo + " até " + dataBR(l.proAte) : "") + (l.cancelado ? " · cancelou: " + l.cancelado : "");
     const ap = Number(l.aparelhos) || 0, aps = document.createElement("span"); aps.className = "aps" + (ap >= 2 ? " cheio" : ""); aps.title = ap + " de 2 aparelhos em uso";
