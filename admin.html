@@ -65,6 +65,28 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .hist-l.erro b,.hist-l.erro small{color:var(--vermelho,#e57373)}
 .tag.pro{background:var(--ouro);color:#2a2420;vertical-align:2px}
 .tag.pais{background:#1d3550;color:#cfe3ff;vertical-align:2px}
+.tag.cupom{background:#3a2a10;color:#f3d48b;border:1px dashed #e2b54a;vertical-align:2px}
+/* cartão de licença (13/11): posições fixas */
+.lic .cab{display:block}
+.lic .l1{display:flex;align-items:center;gap:8px;min-width:0}
+.lic .l1 .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:normal}
+.lic .l1 .selo{flex:none;white-space:nowrap}
+.lic .l1 .selo.teste{background:transparent;color:var(--ouro);border:1.5px solid var(--ouro)}
+.lic .l1 .mais{flex:none}
+.lic .em{display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:normal}
+.lic .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;min-height:20px}
+.tag.mini{font-size:.68rem;font-weight:700;padding:2px 8px;vertical-align:0}
+.tag.mini.teste{background:#16302c;color:#bfeee5}
+.lic .info .datas{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lic .info .cod{flex:none;font-family:ui-monospace,Consolas,monospace;font-size:.76rem;color:var(--muted);letter-spacing:.04em}
+.cupons{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.cupons h3{margin:0 0 8px;font-size:.72rem;color:var(--ouro);letter-spacing:.1em;text-transform:uppercase}
+.cupons .cl{display:flex;flex-wrap:wrap;gap:8px}
+.cupons button{display:inline-flex;align-items:baseline;gap:6px;background:var(--fundo);border:1px dashed #6b5634;border-radius:20px;padding:6px 12px;font:inherit;font-size:.88rem;color:var(--ink);cursor:pointer}
+.cupons button b{color:var(--ouro);font-family:"Bricolage Grotesque",system-ui,sans-serif}
+.cupons button small{color:var(--muted)}
+.cupons button[aria-pressed="true"]{border-style:solid;border-color:var(--verde);background:#16302c}
+.cupons p{margin:6px 0 0;color:var(--muted);font-size:.8rem}
 .tag.basico{background:#4a4540;color:#d8d2ca;vertical-align:2px}
 .resumo-total{cursor:pointer;border-radius:12px;padding:2px 6px;margin:-2px -6px}
 .resumo-total[aria-pressed="true"] span{color:var(--verde)}
@@ -295,6 +317,8 @@ function situacao(l){
   const st = String(l.status).toLowerCase();
   if (st === "reembolsado") return "reembolsada"; /* v22: o motivo do bloqueio aparece no selo */
   if (st === "contestado") return "contestada";
+  /* bloqueada à mão DEPOIS de um reembolso (antes da v29 o bloqueio apagava a marca): continua contando como reembolsada */
+  if (st === "bloqueado" && ((resumo && resumo.eventos) || []).some(e => e.tipo === "reembolso" && String(e.email).toLowerCase() === String(l.email).toLowerCase())) return "reembolsada";
   if (st !== "ativo") return "bloqueado";
   if (l.validoAte && Date.now() > l.validoAte) return "vencida";
   return "ativo";
@@ -308,7 +332,7 @@ async function carregar(){
 }
 /* (5.0) quem é quem. manual = criada no admin (pedido "painel") ou sem pedido de compra; pagante = ativa e veio de uma compra;
    assinante = pagante com prazo (mensal ou anual). Cortesia e teste nunca viram assinatura sozinhos. */
-const manual = l => { const p = String(l.pedido || "").trim(); return !p || p === "painel"; };
+const manual = l => { const p = String(l.pedido || "").trim(); return !p || p === "painel" || p === "manual"; };
 const pagante = l => situacao(l) === "ativo" && !manual(l);
 const assinante = l => pagante(l) && !!l.validoAte;
 const cancelouRenov = l => !!String(l.cancelado || "").trim();
@@ -346,7 +370,7 @@ function desenhar(){
     cancelou: l => assinante(l) && cancelouRenov(l),
     reativou: l => reativaram.has(String(l.email).toLowerCase()),
     manual: l => situacao(l) === "ativo" && manual(l),
-    comprada: l => pagante(l) && !l.validoAte,
+    comprada: l => pagante(l) && !l.validoAte && !l.cortesia,
     teste: testando,
     pro: l => !!l.pro && situacao(l) === "ativo",
     basico: l => !l.pro && situacao(l) === "ativo",
@@ -355,6 +379,9 @@ function desenhar(){
     bloqueado: l => situacao(l) === "bloqueado",
     reembolsada: l => situacao(l) === "reembolsada" || situacao(l) === "contestada"
   };
+  /* cupons (script v28): filtro "cupom:CODIGO" mostra quem comprou com aquele cupom */
+  const cupomDe = l => { const c = String(l.cupom || "").trim(); return c && c !== "-" && !/^di_/.test(c) ? c : ""; };
+  if (/^cupom:/.test(filtro)){ const k = filtro.slice(6); F[filtro] = l => cupomDe(l).toLowerCase() === k.toLowerCase(); }
   if (!F[filtro]) filtro = "todas";
   FILTRO_FN = F[filtro] || null;
   const conta = id => dados.filter(F[id]).length;
@@ -399,7 +426,16 @@ function desenhar(){
     const b = E("button", "dash-c" + (k && cls ? " " + cls : "")); b.type = "button"; b.disabled = !k && filtro !== id; b.setAttribute("aria-pressed", String(filtro === id));
     b.append(E("b", "", id === "reativou" && !temResumo ? "–" : String(k)), E("span", "", nome)); if (sub) b.append(E("small", "", sub)); b.onclick = () => alternar(id); grid.appendChild(b); });
   const todas = E("button", "dash-todas", filtro === "todas" ? dados.length + " licenças no total (contando testes, cortesias e antigas)" : "Mostrando um filtro · tocar para ver todas as " + dados.length + " licenças"); todas.type = "button"; todas.onclick = () => { filtro = "todas"; desenhar(); };
-  box.append(topo, grid, todas);
+  /* QUADRO DE CUPONS: qual cupom (testador, indicação) trouxe mais gente. Conta todas as licenças que compraram com ele. */
+  const porCupom = {};
+  dados.forEach(l => { const c = cupomDe(l); if (!c) return; const k = c.toUpperCase(); porCupom[k] = porCupom[k] || {n: 0, ativos: 0, nome: c}; porCupom[k].n++; if (pagante(l)) porCupom[k].ativos++; });
+  const listaCup = Object.values(porCupom).sort((a, b) => b.n - a.n);
+  const blocoCup = E("div", "cupons"); blocoCup.append(E("h3", "", "Cupons usados"));
+  if (listaCup.length){ const cl = E("div", "cl");
+    listaCup.forEach(x => { const b = E("button"); b.type = "button"; b.setAttribute("aria-pressed", String(filtro === "cupom:" + x.nome)); b.append(E("b", "", x.nome), E("span", "", x.n + (x.n === 1 ? " compra" : " compras")), E("small", "", x.ativos + " ativ" + (x.ativos === 1 ? "o" : "os"))); b.onclick = () => alternar("cupom:" + x.nome); cl.appendChild(b); });
+    blocoCup.append(cl, E("p", "", "Toque num cupom para ver quem comprou com ele."));
+  } else blocoCup.append(E("p", "", resumo && resumo.v >= 25 && dados.some(l => "cupom" in l) ? "Ninguém comprou com cupom ainda." : "Aparece aqui depois de atualizar o script para a v28."));
+  box.append(topo, grid, blocoCup, todas);
 
   const q = $("busca").value.trim().toLowerCase();
   const lista = dados.filter(l => {
@@ -411,32 +447,32 @@ function desenhar(){
   if (!lista.length){ const p = document.createElement("p"); p.className = "nota"; p.textContent = "Nenhuma licença encontrada."; $("lista").appendChild(p); }
   lista.forEach(l => {
     const s = situacao(l), c = document.createElement("div"); c.className = "card lic";
-    const cab = document.createElement("div"); cab.className = "cab";
-    /* 13/11 (Gabriel): só 2 cores no selo: Pro dourado, Básico cinza; fora de "ativo" a mesma cor bem apagada */
-    const ehProSelo = /^Pro/.test(seloSituacao(l, s));
-    cab.innerHTML = '<div><div class="nm"></div><div class="em"></div></div><span class="tag ' + (ehProSelo ? "pro" : "basico") + (s === "ativo" ? "" : " apagado") + '"></span>';
-    cab.querySelector(".nm").textContent = l.nome || l.email;
-    /* 13/11: o plano já vai no selo da direita ("Pro ativo", "Básico estornado"); ao lado do nome só cortesia e teste */
-    if (l.pro && (l.cortesia || l.proTipo === "teste")){ const pr = document.createElement("span"); pr.className = "tag pro"; pr.textContent = l.cortesia ? "PRO cortesia" : "PRO teste"; cab.querySelector(".nm").append(" ", pr); }
-    if (manual(l) && s === "ativo"){ const mn = document.createElement("span"); mn.className = "tag manual"; mn.textContent = l.cortesia ? "cortesia" : "manual"; mn.title = "Criada no admin: não conta como assinatura"; cab.querySelector(".nm").append(" ", mn); }
-    if (cancelouRenov(l) && s === "ativo"){ const cn = document.createElement("span"); cn.className = "tag cancelou"; cn.textContent = "renovação cancelada"; cab.querySelector(".nm").append(" ", cn); }
-    /* país do cliente (pelo cartão da Stripe): só aparece quando NÃO é do Brasil */
-    if (l.pais && l.pais !== "BR"){ const pa = document.createElement("span"); pa.className = "tag pais"; pa.textContent = bandeira(l.pais) + " " + nomePais(l.pais); cab.querySelector(".nm").append(" ", pa); }
-    cab.querySelector(".em").textContent = (l.nome ? l.email + " · " : "") + "código " + l.codigo;
-    cab.querySelector(":scope > .tag").textContent = seloSituacao(l, s);
-    const info = document.createElement("div"); info.className = "info";
-    const datas = document.createElement("span"); datas.textContent = "Desde " + dataBR(l.data) + " · " + (l.validoAte ? "válida até " + dataBR(l.validoAte) : "vitalícia") + (l.proTipo && l.proAte ? " · " + l.proTipo + " até " + dataBR(l.proAte) : "") + (l.cancelado ? " · cancelou: " + l.cancelado : "");
-    const ap = Number(l.aparelhos) || 0, aps = document.createElement("span"); aps.className = "aps" + (ap >= 2 ? " cheio" : ""); aps.title = ap + " de 2 aparelhos em uso";
+    /* CARTÃO (13/11, Gabriel: "bagunça de tags"): posições fixas, um selo só e nada quebrando no meio da palavra.
+       Linha 1: nome (1 linha) + selo + ⋯ | linha 2: e-mail (1 linha) | linha 3: etiquetas pequenas | linha 4: datas, código, aparelhos. */
+    const E = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const testeEmCurso = l.proTipo === "teste" && l.teste && Date.now() < l.teste + 7 * DIA;
+    const proAgora = s === "ativo" && (l.cortesia || (l.pro && l.proTipo !== "teste") || testeEmCurso);
+    const seloTxt = s !== "ativo" ? seloSituacao(l, s) : l.cortesia ? "Pro cortesia" : testeEmCurso ? "Pro teste" : proAgora ? "Pro" : "Básico";
+    const l1 = E("div", "l1"); l1.append(E("b", "nm", l.nome || l.email), E("span", "tag selo " + (proAgora || /^Pro/.test(seloTxt) ? "pro" : "basico") + (s === "ativo" ? "" : " apagado") + (testeEmCurso ? " teste" : ""), seloTxt), E("span", "mais", "⋯"));
+    l1.lastChild.setAttribute("aria-hidden", "true");
+    const l2 = E("div", "em", l.email);
+    const chips = E("div", "chips");
+    const chip = (txt, cls, tit) => { const c = E("span", "tag mini " + (cls || ""), txt); if (tit) c.title = tit; chips.append(c); };
+    { const cp = String(l.cupom || "").trim(); if (cp && cp !== "-" && !/^di_/.test(cp)) chip("🎟 " + cp, "cupom", "Comprou com o cupom " + cp); }
+    if (cancelouRenov(l) && s === "ativo") chip("renovação cancelada", "cancelou");
+    if (testeEmCurso) chip("teste até " + dataBR(l.teste + 7 * DIA).slice(0, 5) + " · " + Math.max(0, Math.ceil((l.teste + 7 * DIA - Date.now()) / DIA)) + " dias", "teste");
+    else if (l.teste) chip(l.testeFim === "ok" ? "testou o Pro e ficou no básico" : /^pro|^upgrade/.test(l.proTipo) ? "testou o Pro e assinou" : "testou o Pro", "");
+    if (manual(l) && !l.cortesia && s === "ativo") chip("criada no admin", "manual", "Não conta como assinatura");
+    if (l.pais && l.pais !== "BR") chip(bandeira(l.pais) + " " + nomePais(l.pais), "pais");
+    const info = E("div", "info");
+    const datas = E("span", "datas", "Desde " + dataBR(l.data).slice(0, 5) + " · " + (l.validoAte ? "até " + dataBR(l.validoAte) : "vitalícia"));
+    const cod = E("span", "cod", l.codigo);
+    const ap = Number(l.aparelhos) || 0, aps = E("span", "aps" + (ap >= 2 ? " cheio" : "")); aps.title = ap + " de 2 aparelhos em uso";
     aps.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg>';
     aps.append(ap + "/2");
-    info.append(datas, aps);
-    if (l.teste){ const fimT = l.teste + 7 * DIA, emCurso = Date.now() < fimT && l.proTipo === "teste";
-      const t = document.createElement("div"); t.className = "teste-l" + (emCurso ? "" : " fim");
-      t.textContent = "Teste grátis do Pro: " + dataBR(l.teste) + " a " + dataBR(fimT) + (emCurso ? " · em andamento (" + Math.max(0, Math.ceil((fimT - Date.now()) / DIA)) + " dias)" : l.testeFim === "ok" ? " · acabou, ficou no básico" : /^pro|^upgrade/.test(l.proTipo) ? " · acabou e assinou o Pro" : " · acabou");
-      c.__teste = t; }
+    info.append(datas, cod, aps);
+    const cab = E("div", "cab"); cab.append(l1, l2, chips);
     const hl = document.createElement("div"); hl.className = "hist"; hl.hidden = true;
-    const mais = document.createElement("span"); mais.className = "mais"; mais.textContent = "⋯"; mais.setAttribute("aria-hidden", "true");
-    cab.querySelector(":scope > .tag").after(mais);
     /* segurar 0,6 s = excluir; toque normal = menu */
     let tSeg = null, segurou = false;
     const soltar = () => { clearTimeout(tSeg); c.classList.remove("segurando"); };
@@ -448,7 +484,7 @@ function desenhar(){
     seta.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
     seta.addEventListener("pointerdown", e => e.stopPropagation());
     seta.onclick = e => { e.stopPropagation(); const abrir = hl.hidden; seta.setAttribute("aria-expanded", String(abrir)); if (abrir) verHistorico(l, hl); else hl.hidden = true; };
-    c.append(cab, info); if (c.__teste) c.append(c.__teste); c.append(hl, seta); $("lista").appendChild(c);
+    c.append(cab, info, hl, seta); $("lista").appendChild(c);
   });
 }
 const ICO = {
@@ -488,7 +524,7 @@ function menuLic(l, hl, excluir){
   const grupo = (...xs) => { const g = document.createElement("div"); g.className = "ac-grupo"; g.append(...xs.filter(Boolean)); return g; };
   corpo.append(
     div("Acesso"), grupo(
-    s === "bloqueado" ? item("ativ", "Desbloquear", "volta a funcionar na hora", () => rodar(() => api({acao: "admin_status", email: l.email, status: "ativo"}), "Desbloqueada"))
+    s === "reembolsada" || s === "contestada" ? null : s === "bloqueado" ? item("ativ", "Desbloquear", "volta a funcionar na hora", () => rodar(() => api({acao: "admin_status", email: l.email, status: "ativo"}), "Desbloqueada"))
       : item("bloq", "Bloquear", "o app para de funcionar", () => rodar(() => api({acao: "admin_status", email: l.email, status: "bloqueado"}), "Bloqueada"), "perigo"),
     item("mais", "Dar mais 30 dias", (l.validoAte ? "vale até " + dataBR(Math.max(Date.now(), l.validoAte) + 30 * DIA) + " · " : "") + "a cobrança na Stripe também é adiada", () => rodar(() => api({acao: "admin_validade", email: l.email, dias: 30}),
       j => j.stripe === "adiada" ? "+30 dias · próxima cobrança na Stripe adiada 30 dias" : j.stripe === "erro" ? "+30 dias na licença, MAS a Stripe não adiou a cobrança: " + (j.stripeErro || "erro") : j.stripe === "sem" ? "+30 dias (sem assinatura ativa na Stripe para adiar)" : "+30 dias na licença (a Stripe só é adiada com o script v25)")),
