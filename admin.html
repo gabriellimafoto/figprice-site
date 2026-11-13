@@ -43,7 +43,8 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 .barra input{flex:1;min-width:200px}
 .filtros{display:flex;gap:6px;flex-wrap:wrap}
 .filtros button[aria-pressed="true"]{background:var(--verde);border-color:var(--verde);color:#11201e}
-.lista{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+.lista{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr))}
+.lista > *,.lic,.lic .cab,.lic .l1{min-width:0;max-width:100%} /* 13/11: o nome comprido (1 linha) alargava a página no celular */
 @media (max-width:420px){.lista{grid-template-columns:1fr}}
 .lic{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
 .lic .cab{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
@@ -222,6 +223,46 @@ dialog,.ac-corpo{overscroll-behavior:contain}
 .ps.erro span{color:var(--vermelho)}
 .ps.abriu span{color:var(--verde);font-weight:700}
 .ps.tela span b{font-weight:700}
+/* ===== ADMIN NO CELULAR (13/11): topo compacto, lista mais perto do topo ===== */
+.din-abrir{display:none;float:right;background:none;border:0;color:var(--muted);font:inherit;font-size:.78rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:600}
+@media (max-width:700px){
+  main{width:calc(100% - 20px);padding:12px 0 50px}
+  h1{font-size:1.35rem}
+  .topo{margin-bottom:10px;gap:8px}
+  .topo{flex-wrap:wrap}
+  .topo > div{width:100%;display:grid !important;grid-template-columns:1.3fr 1.2fr 1fr .7fr;gap:6px !important}
+  .topo .btn{min-height:36px;padding:6px 4px;font-size:.82rem;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .dash{gap:8px;margin-bottom:10px}
+  .dash-topo{gap:8px}
+  .dash-heroi{padding:12px 14px;gap:8px;border-radius:14px}
+  .dash-heroi .dh-topo b{font-size:2.4rem}
+  .dh-topo strong{font-size:1.05rem}
+  .dh-barra{height:7px}
+  .dh-mini{gap:6px}
+  .dh-mini div{padding:6px 8px;border-radius:10px}
+  .dash-heroi .dh-mini b{font-size:1.1rem}
+  .dash-heroi .dh-mini span{font-size:.7rem}
+  .dash-din{padding:10px 14px;border-radius:14px}
+  .dash-din h3{margin:0 0 4px}
+  .din-abrir{display:inline}
+  .dash-din:not(.aberto) .l:not(.liq){display:none}
+  .dash-din:not(.aberto) p{display:none}
+  .dash-din .l{padding:4px 0;font-size:.86rem}
+  .dash-grid{display:flex;overflow-x:auto;gap:8px;padding-bottom:2px;scroll-snap-type:x proximity;scrollbar-width:none}
+  .dash-grid::-webkit-scrollbar{display:none}
+  .dash-c{flex:0 0 auto;width:118px;padding:8px 10px;border-radius:12px;scroll-snap-align:start}
+  .dash-c b{font-size:1.25rem}
+  .dash-c span{font-size:.76rem;line-height:1.2}
+  .dash-c small{display:none}
+  .cupons{padding:8px 12px;border-radius:12px}
+  .cupons h3{margin:0 0 6px}
+  .cupons .cl{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .cupons button{white-space:nowrap;padding:4px 10px;font-size:.82rem}
+  .cupons p{display:none}
+  .dash-todas{font-size:.78rem}
+  .barra{margin:10px 0}
+  .lic{padding:12px 12px 22px}
+}
 </style>
 </head>
 <body>
@@ -399,7 +440,8 @@ function desenhar(){
   heroi.append(hTopo, hBarra, hMini);
   if (!ass.length) heroi.append(E("span", "", "Ninguém pagando ainda. Contas de teste e cortesias aparecem abaixo."));
   heroi.onclick = () => alternar("assinante");
-  const din = E("div", "dash-din"); din.append(E("h3", "", "Dinheiro"));
+  const din = E("div", "dash-din" + (localStorage.getItem("ff_admin_din") === "1" ? " aberto" : "")); { const h = E("h3", "", "Dinheiro"); const t = E("button", "din-abrir", din.classList.contains("aberto") ? "fechar" : "ver tudo"); t.type = "button";
+    t.onclick = () => { const ab = din.classList.toggle("aberto"); t.textContent = ab ? "fechar" : "ver tudo"; localStorage.setItem("ff_admin_din", ab ? "1" : "0"); }; h.append(t); din.append(h); }
   const linhaD = (rot, val, cls) => { const l = E("div", "l" + (cls ? " " + cls : "")); l.append(E("span", "", rot), E("b", "", val)); return l; };
   din.append(linhaD("Receita mensal estimada", R$(mensal)));
   const dm = resumo && resumo.dinheiro;
