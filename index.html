@@ -492,6 +492,14 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px}
 @media (max-width:760px){.jeitos{grid-template-columns:1fr}.jeito{padding:24px}}
 @media (prefers-reduced-motion: reduce){.jeito.novo::before{animation:none;display:none}.jeito.velho li span{transition:none}}
 </style>
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','29529068630023708');fbq('track','PageView');
+var FP_PLANOS={"9B69AV3QY07LdjG3LG9k403":["Basico mensal",19.9],"bJeaEZ1IQ8Eh5Re4PK9k400":["Basico anual",199],"fZu14p9bif2FfrObe89k401":["Pro mensal",39.9],"14AbJ30EM1bPcfC9609k405":["Pro anual",399]};
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href*="buy.stripe.com/"]');if(!a)return;var p=FP_PLANOS[a.href.split('buy.stripe.com/')[1].split(/[?#]/)[0]]||["Basico mensal",19.9];try{localStorage.setItem('fp_compra',JSON.stringify({n:p[0],v:p[1],t:Date.now()}))}catch(_){ }fbq('track','InitiateCheckout',{content_name:p[0],value:p[1],currency:'BRL'});},true);
+</script>
+<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=29529068630023708&ev=PageView&noscript=1"></noscript>
 </head>
 <body>
 

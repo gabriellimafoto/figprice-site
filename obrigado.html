@@ -33,6 +33,17 @@ li p{margin:0;color:#d8ccbb}
 .nota{color:#bfae99;font-size:.92rem;margin-top:26px;text-align:center}
 .nota a{color:#e2b54a}
 </style>
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','29529068630023708');fbq('track','PageView');
+(function(){var c=null;try{c=JSON.parse(localStorage.getItem('fp_compra')||'null')}catch(_){ }
+if(c&&c.pago)return;var n=(c&&Date.now()-c.t<864e5)?c.n:'Assinatura',val=(c&&Date.now()-c.t<864e5)?c.v:19.9;
+try{if(sessionStorage.getItem('fp_px'))return;sessionStorage.setItem('fp_px','1')}catch(_){ }
+fbq('track','Purchase',{content_name:n,value:val,currency:'BRL'});
+try{if(c){c.pago=1;localStorage.setItem('fp_compra',JSON.stringify(c))}}catch(_){ }})();
+</script>
+<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=29529068630023708&ev=PageView&noscript=1"></noscript>
 </head>
 <body>
 <main>
