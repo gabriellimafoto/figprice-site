@@ -380,8 +380,13 @@ const cancelouRenov = l => !!String(l.cancelado || "").trim();
 const testando = l => situacao(l) === "ativo" && l.proTipo === "teste" && !!l.proAte && Date.now() < l.proAte;
 const proPago = l => /^(pro|upgrade)/.test(String(l.proTipo || "")) && !!l.proAte && Date.now() < l.proAte;
 /* quanto essa licença rende por mês se continuar renovando (anual dividido por 12). Renovação cancelada não conta. */
-function receitaMensal(l){
+/* 16/11 (Gabriel): quem está com a COBRANÇA PAUSADA (plano mensal com validade mais de 40 dias à frente: tempo dado pelo admin,
+   a Stripe só volta a cobrar depois) não entra na receita do mês. O valor aparece à parte, como "pausado". */
+const cobrancaPausada = l => { const tp = String(l.proTipo || ""), mensal = /^pro /.test(tp) && proPago(l) ? !/anual/.test(tp) : l.plano !== "anual";
+  return assinante(l) && mensal && Math.max(Number(l.validoAte) || 0, /^pro /.test(tp) ? Number(l.proAte) || 0 : 0) - Date.now() > 40 * DIA; };
+function receitaMensal(l, comPausada){
   if (!assinante(l)) return 0;
+  if (!comPausada && cobrancaPausada(l)) return 0;
   const canc = String(l.cancelado || "").split(","), tp = String(l.proTipo || ""); let v = 0;
   if (/^pro /.test(tp) && proPago(l)){ if (!canc.includes("pro")) v += /anual/.test(tp) ? 399 / 12 : 39.9; }
   else {
@@ -428,6 +433,7 @@ function desenhar(){
   const conta = id => dados.filter(F[id]).length;
   const ass = dados.filter(assinante), nPro = ass.filter(l => l.pro && l.proTipo !== "teste").length, nAnual = ass.filter(l => l.plano === "anual").length;
   const mensal = dados.reduce((t, l) => t + receitaMensal(l), 0);
+  const pausados = dados.filter(cobrancaPausada), valPausado = pausados.reduce((t, l) => t + receitaMensal(l, true), 0);
   const R$ = v => "R$ " + Number(v || 0).toLocaleString("pt-BR", {minimumFractionDigits: 2, maximumFractionDigits: 2});
   const E = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const alternar = id => { filtro = filtro === id ? "todas" : id; desenhar(); };
@@ -444,13 +450,20 @@ function desenhar(){
     t.onclick = () => { const ab = din.classList.toggle("aberto"); t.textContent = ab ? "fechar" : "ver tudo"; localStorage.setItem("ff_admin_din", ab ? "1" : "0"); }; h.append(t); din.append(h); }
   const linhaD = (rot, val, cls) => { const l = E("div", "l" + (cls ? " " + cls : "")); l.append(E("span", "", rot), E("b", "", val)); return l; };
   din.append(linhaD("Receita mensal estimada", R$(mensal)));
+  if (valPausado) din.append(linhaD("Cobrança pausada (" + pausados.length + ")", R$(valPausado)));
   const dm = resumo && resumo.dinheiro;
   if (dm && dm.mes){
     din.append(linhaD("Vendido este mês (" + dm.mes.vendas + (dm.mes.vendas === 1 ? " pagamento)" : " pagamentos)"), R$(dm.mes.bruto)), linhaD("Taxas da Stripe", "− " + R$(dm.mes.taxas)));
     if (dm.mes.devolvido) din.append(linhaD("Devolvido (reembolsos)", "− " + R$(dm.mes.devolvido)));
     din.append(linhaD("Líquido este mês", R$(dm.mes.liquido), "liq"));
     if (dm.anterior) din.append(linhaD("Líquido do mês passado", R$(dm.anterior.liquido)));
-    din.append(E("p", "", "Estimada = soma dos planos de quem está com a renovação ligada (anual dividido por 12). Os outros valores vêm direto da Stripe."));
+    /* script v31: o que a Stripe já depositou no banco, o que está a caminho e o que ainda está na Stripe */
+    if (dm.caixa){ const c = dm.caixa;
+      din.append(linhaD("Já caiu na sua conta" + (c.depositos ? " (" + c.depositos + (c.depositos === 1 ? " depósito)" : " depósitos)") : ""), R$(c.depositado), "liq"));
+      if (c.caminho) din.append(linhaD("A caminho do banco", R$(c.caminho)));
+      din.append(linhaD("Ainda na Stripe (falta liberar)", R$(c.naStripe)));
+    }
+    din.append(E("p", "", "Estimada = o que entra no próximo mês: planos de quem está com a renovação ligada (anual dividido por 12), sem quem está com a cobrança pausada. Os outros valores vêm direto da Stripe."));
   } else din.append(E("p", "", resumo && resumo.v ? "A chave da Stripe não deixou ler o saldo (precisa da permissão de leitura em Saldo). O resto funciona normal." : "Estimada = soma dos planos de quem está com a renovação ligada (anual dividido por 12). Vendido, taxas e líquido do mês aparecem aqui depois de atualizar o script para a v25."));
   const topo = E("div", "dash-topo"); topo.append(heroi, din);
   const grid = E("div", "dash-grid");
