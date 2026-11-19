@@ -124,7 +124,8 @@ input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l
 #abrirReemb{position:relative}
 #abrirReemb .n{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--vermelho);color:#fff;font-size:.72rem;font-weight:800;display:grid;place-items:center}
 .re-item{border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0;background:var(--fundo)}
-.re-item b{display:block;overflow-wrap:anywhere}.re-item small{color:var(--muted);display:block;overflow-wrap:anywhere}
+.re-item b{display:block;overflow-wrap:anywhere}.re-item.erro{border-color:var(--vermelho)}
+.aviso-erros{display:block;width:100%;margin:0 0 10px;padding:9px 14px;border:1px solid var(--vermelho);border-radius:12px;background:#3a1714;color:#ffc9c2;font:inherit;font-size:.88rem;font-weight:700;text-align:left;cursor:pointer}.aviso-erros[hidden]{display:none}.re-item small{color:var(--muted);display:block;overflow-wrap:anywhere}
 .re-item .re-mot{margin:8px 0 0;font-size:.88rem}
 .re-item .btns{display:flex;gap:8px;margin-top:10px}.re-item .btns .btn{flex:1}
 .re-st{display:inline-block;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-left:6px;vertical-align:2px}
@@ -309,6 +310,7 @@ html,body{overflow-x:clip}
   <section id="telaPainel" hidden>
     <div class="topo"><h1>Licenças</h1><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ouro" id="abrirNova">+ Nova licença</button><button class="btn" id="abrirReemb">Movimento</button><button class="btn" id="atualizar">Atualizar</button><button class="btn" id="sair">Sair</button></div></div>
     <p class="carregando" id="carregando" hidden>Atualizando…</p>
+    <button type="button" class="aviso-erros" id="avisoErros" hidden></button>
     <div class="stats card" id="stats"></div>
     <dialog id="dlgNova">
       <div class="dlg-cab"><h2>Nova licença</h2><button class="fechar" id="fecharNova" aria-label="Fechar">×</button></div>
@@ -432,7 +434,7 @@ const dataBR = t => t ? new Date(t).toLocaleDateString("pt-BR") : "";
 async function carregar(){
   $("carregando").hidden = false; if (dados.length) $("lista").classList.add("velha");
   /* 18/11: os 4 pedidos saem JUNTOS (antes o resumo, os reembolsos e os motivos só começavam depois da lista: ~8 s em fila). Com o script v32 a leitura não espera trava. */
-  carregarReemb(); carregarFeedback().catch(() => {}); carregarResumo();
+  carregarReemb(); carregarFeedback().catch(() => {}); carregarResumo(); carregarErros();
   try{ const j = await api({acao: "admin_listar"}); if (!j.ok){ toast(j.erro || "Erro ao carregar"); return; } dados = j.licencas; try{ localStorage.setItem("ff_admin_cache", JSON.stringify(dados)); }catch(_){} desenhar(); }
   catch(e){ toast(dados.length ? "O Google não respondeu agora. Mostrando a última lista salva; toque em Atualizar." : "O Google não respondeu agora. Toque em Atualizar."); }
   finally{ $("carregando").hidden = true; $("lista").classList.remove("velha"); }
@@ -519,6 +521,7 @@ function desenhar(){
     t.onclick = () => { const ab = din.classList.toggle("aberto"); t.textContent = ab ? "fechar" : "ver detalhes"; localStorage.setItem("ff_admin_din", ab ? "1" : "0"); }; h.append(t); din.append(h); }
   const linhaD = (rot, val, cls) => { const l = E("div", "l" + (cls ? " " + cls : "")); l.append(E("span", "", rot), E("b", "", val)); return l; };
   const dm = resumo && resumo.dinheiro, cx = dm && dm.caixa;
+  const dataCurta = t => new Date(t).toLocaleDateString("pt-BR", {day: "2-digit", month: "2-digit", timeZone: "UTC"});
   const nomeMes = d => new Date(new Date().getFullYear(), new Date().getMonth() + d, 1).toLocaleDateString("pt-BR", {month: "long"});
   const prev = E("div", "din-grupo"); prev.append(E("h4", "", "Previsão do próximo mês"), linhaD("Renovações previstas", R$(mensal)));
   if (valPausado) prev.append(linhaD("Cobrança pausada (" + pausados.length + "), não entra", R$(valPausado), "fraco"));
@@ -527,7 +530,7 @@ function desenhar(){
     const centavos = v => Math.round((Number(v) || 0) * 100), falta = (centavos(cx.caminho) + centavos(cx.naStripe)) / 100, tot = (centavos(cx.depositado) + centavos(falta)) / 100;
     const par = E("div", "din-par");
     const cCaiu = E("div", "caiu"); cCaiu.append(E("span", "", "Já caiu na sua conta"), E("b", "", R$(cx.depositado)), E("small", "", cx.depositos ? cx.depositos + (cx.depositos === 1 ? " depósito" : " depósitos") + (cx.ultimo ? " · último " + new Date(cx.ultimo).toLocaleDateString("pt-BR", {day: "2-digit", month: "2-digit"}) : "") : "nenhum depósito ainda"));
-    const cFalta = E("div", "falta"); cFalta.append(E("span", "", "Falta cair"), E("b", "", R$(falta)), E("small", "", cx.caminho ? R$(cx.caminho) + " a caminho do banco" : "ainda na Stripe"));
+    const cFalta = E("div", "falta"); cFalta.append(E("span", "", "Falta cair"), E("b", "", R$(falta)), E("small", "", cx.caminho ? R$(cx.caminho) + " a caminho do banco" : cx.liberar && cx.liberar.length ? "próximo: " + R$(cx.liberar[0].valor) + " em " + dataCurta(cx.liberar[0].data) : "ainda na Stripe"));
     par.append(cCaiu, cFalta);
     const barra = E("div", "din-barra"); if (tot > 0){ const a = E("i", "caiu"); a.style.flexGrow = cx.depositado; const b = E("i", "falta"); b.style.flexGrow = falta; barra.append(a, b); }
     const totL = E("div", "din-tot"); totL.append("Ficou para você desde o começo: ", E("b", "", R$(tot)));
@@ -543,7 +546,12 @@ function desenhar(){
     }
     const onde = E("div", "din-grupo"); onde.append(E("h4", "", "Onde está esse dinheiro"), linhaD("Já caiu na sua conta", R$(cx.depositado)));
     if (cx.caminho) onde.append(linhaD("A caminho do banco", R$(cx.caminho)));
-    onde.append(linhaD("Ainda na Stripe (libera em alguns dias)", R$(cx.naStripe)), linhaD("Total", R$(tot), "soma"));
+    /* v33: a Stripe segura cada venda alguns dias (conta nova: ~30) e só depois manda para o banco. Mostra quanto libera em cada data. */
+    if (cx.liberar && cx.liberar.length){
+      if (Math.abs(cx.liberado) >= 0.01) onde.append(linhaD(cx.liberado > 0 ? "Já liberado (vai no próximo depósito)" : "Taxa já descontada do saldo", (cx.liberado < 0 ? "− " : "") + R$(Math.abs(cx.liberado))));
+      cx.liberar.forEach(x => onde.append(linhaD("A Stripe libera em " + dataCurta(x.data), R$(x.valor))));
+    } else onde.append(linhaD("Ainda na Stripe (libera em alguns dias)", R$(cx.naStripe)));
+    onde.append(linhaD("Total", R$(tot), "soma"));
     det.append(onde);
     if (dm.mes){ const m = E("div", "din-grupo"); m.append(E("h4", "", "Por mês (o que ficou para você)"));
       const linhaMes = (rot, x) => { const l = linhaD(rot, R$(x.liquido)); if (x.vendas) l.querySelector("span").append(E("small", "", "vendeu " + R$(x.bruto) + (x.devolvido ? " · devolveu " + R$(x.devolvido) : "") + " · taxas " + R$(x.taxas))); return l; };
@@ -781,6 +789,20 @@ async function carregarReemb(){
 /* (5.0) MOVIMENTO: tudo que aconteceu, em abas. Antes era "Reembolsos e motivos" (quase sempre vazio e sem cancelamentos:
    para ver quem cancelou tinha que abrir a Stripe). Abas: Tudo (linha do tempo de 90 dias), Cancelamentos, Reembolsos, Motivos. */
 let abaMov = "tudo";
+/* 18/11 (Gabriel, item 1.2): AVISO DE ERROS. O script v33 junta os erros e falhas de todo mundo (aba Logs, 7 dias).
+   Faixa vermelha no topo quando aparece ERRO novo (algo quebrou no app) desde a última vez que ele olhou; toque abre Movimento > Erros. */
+let erros = null;
+async function carregarErros(){
+  try{ const j = await api({acao: "admin_erros"}); if (j && j.ok){ erros = j.erros || []; avisoErros(); if ($("dlgReemb").open && abaMov === "erros") abrirReemb(); } }catch(_){}
+}
+function avisoErros(){
+  const b = $("avisoErros"); if (!erros){ b.hidden = true; return; }
+  const visto = Number(localStorage.getItem("ff_admin_erros_visto") || 0), novos = erros.filter(e => e.tipo === "ERRO" && e.ultimo > visto);
+  b.hidden = !novos.length;
+  if (novos.length){ const gente = new Set(); novos.forEach(e => e.quem.forEach(q => gente.add(q)));
+    b.textContent = (novos.length === 1 ? "1 erro novo" : novos.length + " erros novos") + " no app · " + gente.size + (gente.size === 1 ? " pessoa" : " pessoas") + " · ver"; }
+  b.onclick = () => { abaMov = "erros"; abrirReemb(); };
+}
 function abrirReemb(){
   const d = $("dlgReemb"), fechar = () => d.close();
   const E = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -791,7 +813,7 @@ function abrirReemb(){
   const pend = reembolsos.filter(x => x.status === "pendente").length;
   const cancAgora = dados.filter(l => situacao(l) === "ativo" && cancelouRenov(l));
   const abas = E("div", "abas-m"); abas.setAttribute("role", "tablist");
-  [["tudo", "Tudo", eventos.length], ["canc", "Cancelamentos", cancAgora.length], ["reemb", "Reembolsos", pend || reembolsos.length], ["motivos", "Motivos", feedbacks && feedbacks.itens ? feedbacks.itens.length : 0]].forEach(([id, nome, k]) => {
+  [["tudo", "Tudo", eventos.length], ["canc", "Cancelamentos", cancAgora.length], ["reemb", "Reembolsos", pend || reembolsos.length], ["motivos", "Motivos", feedbacks && feedbacks.itens ? feedbacks.itens.length : 0], ["erros", "Erros", erros ? erros.filter(e => e.tipo === "ERRO").length : 0]].forEach(([id, nome, k]) => {
     const b = E("button", "", nome); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(abaMov === id)); if (k) b.append(E("i", "", String(k))); b.onclick = () => { abaMov = id; abrirReemb(); }; abas.appendChild(b); });
   const corpo = E("div"); corpo.style.cssText = "max-height:68vh;overflow:auto";
   const vazio = t => corpo.appendChild(E("p", "nota", t));
@@ -845,6 +867,19 @@ function abrirReemb(){
         bs.append(rec, dev); it.appendChild(bs);
       } else if (x.resolvido) it.appendChild(E("small", "", (x.status === "devolvido" ? "Devolvido em " : "Recusado em ") + dataBR(x.resolvido)));
       corpo.appendChild(it);
+    });
+  } else if (abaMov === "erros"){
+    if (erros && erros.length) localStorage.setItem("ff_admin_erros_visto", String(Math.max(...erros.map(e => e.ultimo)))); avisoErros();
+    corpo.appendChild(E("p", "nota", "Últimos 7 dias, de todo mundo. ERRO = algo quebrou no app (o Claude corrige). Falha = o app contornou sozinho: quase sempre internet do cliente ou o Google demorando. A varredura de segunda e quinta explica cada um."));
+    if (!erros) vazio("Aparece aqui depois do script v33.");
+    else if (!erros.length) vazio("Nenhum erro nem falha nos últimos 7 dias.");
+    else [["ERRO", "Quebrou no app"], ["falha", "Falhas contornadas (internet, Google)"]].forEach(([tp, tit]) => {
+      const lst = erros.filter(e => e.tipo === tp); if (!lst.length) return;
+      corpo.appendChild(E("h3", "", tit + " (" + lst.length + ")")).style.cssText = "margin:14px 0 4px;font-size:.95rem";
+      lst.forEach(e => { const it = E("div", "re-item" + (tp === "ERRO" ? " erro" : ""));
+        it.append(E("b", "", e.texto.split(" | ")[0]), E("small", "", e.n + (e.n === 1 ? " vez" : " vezes") + " · " + e.quem.length + (e.quem.length === 1 ? " pessoa" : " pessoas") + (e.versoes.length ? " · versão " + e.versoes.join(", ") : "") + " · último " + new Date(e.ultimo).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"})),
+          E("small", "", e.quem.map(nomeDe).join(", ")));
+        corpo.appendChild(it); });
     });
   } else {
     corpo.appendChild(E("p", "nota", "O que as pessoas escreveram ao cancelar, pedir reembolso ou quase sair."));
