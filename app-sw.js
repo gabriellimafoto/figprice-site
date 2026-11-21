@@ -1,4 +1,6 @@
-const CACHE = "figprice-app-6.4";
+const CACHE = "figprice-app-6.5";
+/* 6.5: a página pergunta qual versão este atualizador traz (só recarrega se for outra) */
+self.addEventListener("message", e => { if (e.data === "versao" && e.ports && e.ports[0]) e.ports[0].postMessage(CACHE); });
 const ARQUIVOS = ["./app", "./app-manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARQUIVOS.map(u => new Request(u, {cache: "reload"})))));
