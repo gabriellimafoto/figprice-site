@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script data-erros>/* 18/11: erros desta página vão para a aba Logs (script v33, "site"). Só o texto do erro e a página, nada de quem visita. */
+<script data-erros>/* 18/11: erros desta página vão para a aba Logs (script v33, "site"). Só o texto do erro e a página, nada de quem visita. 19/11: só erros de arquivos do FigPrice (o navegador do Instagram injeta código próprio). */
 (function(){var U="https://script.google.com/macros/s/AKfycbw4T6NZEemGmCQf1r_PoYeMVFq57wtigSd-XYc711VnBA5y58V0UBnkNgGv0e1bOqFixw/exec",n=0;
 function m(t){if(n++>3)return;try{navigator.sendBeacon(U,JSON.stringify({acao:"log_site",pagina:location.pathname.slice(0,20),erro:String(t).slice(0,700),ua:navigator.userAgent.slice(0,120)}))}catch(e){}}
-addEventListener("error",function(e){if(/^Script error/i.test(e.message||"")&&!e.filename)return;var r=e.target&&e.target!==window?String(e.target.src||e.target.href||""):null;if(r!==null){if(!r||/facebook|google|doubleclick|gstatic/.test(r))return;m("não carregou: "+r.split("?")[0]);return}m((e.message||"")+" @"+String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);
+addEventListener("error",function(e){if(/^Script error/i.test(e.message||"")&&!e.filename)return;var r=e.target&&e.target!==window?String(e.target.src||e.target.href||""):null;if(r!==null){if(!r||/facebook|google|doubleclick|gstatic/.test(r))return;m("não carregou: "+r.split("?")[0]);return}if(e.filename&&!/figprice\.com\.br|^file:|localhost/.test(e.filename))return;m((e.message||"")+" @"+String(e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno)},true);
 addEventListener("unhandledrejection",function(e){m("promessa: "+((e.reason&&(e.reason.message||e.reason))||""))});})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">

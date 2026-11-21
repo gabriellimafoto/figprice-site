@@ -367,7 +367,7 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 logA("abriu", innerWidth + "x" + innerHeight + (navigator.onLine ? "" : " SEM INTERNET"));
 /* 18/11: o Google às vezes falha por um instante (devolve página de erro em vez da resposta, e o navegador acusa "sem conexão").
    Leituras tentam de novo sozinhas até 3 vezes; ações que mudam algo (dar código, reembolsar...) NÃO repetem, para não fazer duas vezes. */
-const LEITURAS = ["admin_listar", "admin_resumo", "admin_reembolsos", "admin_feedback", "admin_logs", "admin_historico"];
+const LEITURAS = ["admin_listar", "admin_resumo", "admin_reembolsos", "admin_feedback", "admin_logs", "admin_historico", "admin_erros"];
 async function api(params){
   const url = API + "?" + new URLSearchParams(Object.assign({token: token || ""}, params)), vezes = LEITURAS.includes(params.acao) ? 3 : 1;
   let j;
@@ -378,7 +378,8 @@ async function api(params){
       if (j && j.erroScript) logA("falha", params.acao + ": " + j.erro);
       break; }
     catch(e){
-      logA("falha", params.acao + " tentativa " + i + "/" + vezes + ": " + (r ? "resposta " + r.status + " " + (r.headers.get("content-type") || "") + " | " + txt.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300) : ((e && e.message) || e) + " (o Google não deixou ler a resposta: costuma ser página de erro dele)")
+      /* 21/11: só a ÚLTIMA tentativa que falha é "falha"; as do meio são "rede" (o Google piscou e a próxima resolveu) */
+      logA(i >= vezes ? "falha" : "rede", params.acao + " tentativa " + i + "/" + vezes + ": " + (r ? "resposta " + r.status + " " + (r.headers.get("content-type") || "") + " | " + txt.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300) : ((e && e.message) || e) + " (o Google não deixou ler a resposta: costuma ser página de erro dele)")
         + " | " + (Date.now() - t0) + " ms | " + (navigator.onLine ? "com internet" : "SEM INTERNET") + (navigator.connection && navigator.connection.effectiveType ? " " + navigator.connection.effectiveType : ""));
       if (i >= vezes) throw e; await new Promise(ok => setTimeout(ok, 800 * i)); }
   }
