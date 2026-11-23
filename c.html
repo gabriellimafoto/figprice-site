@@ -90,7 +90,7 @@ const esc = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({"&": "&am
 const iniciais = n => (String(n || "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join("") || "★").toUpperCase();
 const LOG = "https://script.google.com/macros/s/AKfycbw4T6NZEemGmCQf1r_PoYeMVFq57wtigSd-XYc711VnBA5y58V0UBnkNgGv0e1bOqFixw/exec";
 let nLog = 0;
-function registrar(t){ if (nLog++ > 3) return; try{ navigator.sendBeacon(LOG, JSON.stringify({acao: "log_site", pagina: "/c", erro: String(t).slice(0, 700), ua: navigator.userAgent.slice(0, 120)})); }catch(_){} }
+function registrar(t){ if (!/(^|.)figprice.com.br$/.test(location.hostname) || nLog++ > 3) return; /* só o site de verdade (os testes não sujam os Logs) */ try{ navigator.sendBeacon(LOG, JSON.stringify({acao: "log_site", pagina: "/c", erro: String(t).slice(0, 700), ua: navigator.userAgent.slice(0, 120)})); }catch(_){} }
 addEventListener("error", e => { if (e.filename && /figprice/.test(e.filename)) registrar((e.message || "erro") + " @" + (e.lineno || "")); });
 function aviso(t, d, cod, tentar){ app.innerHTML = '<div class="aviso"><b>' + esc(t) + '</b><span>' + esc(d) + '</span>' + (tentar ? '<br><button type="button">Tentar de novo</button>' : '') + (cod ? '<small>código: ' + esc(cod) + '</small>' : '') + '</div>';
   const b = app.querySelector(".aviso button"); if (b) b.onclick = () => { app.innerHTML = '<div class="roda"></div>'; carregar(); }; }
