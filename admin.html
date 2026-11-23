@@ -693,6 +693,7 @@ function menuLic(l, hl, excluir){
     l.validoAte && cobraNaStripe ? item("mais", "Alinhar a cobrança da Stripe", "para quem ganhou dias antes: cobra só em " + dataBR(l.validoAte - 5 * DIA), () => rodar(() => api({acao: "admin_alinhar", email: l.email}),
       j => j.n ? "Pronto: a Stripe só cobra em " + dataBR(j.ate) : j.ja ? "Já estava certo: a Stripe cobra nessa data ou depois" : "Não achei assinatura ativa na Stripe (ou o script ainda não é o v25)")) : "",
     l.validoAte ? item("infi", "Tornar vitalícia", "nunca vence", () => rodar(() => api({acao: "admin_validade", email: l.email, dias: 0}), "Agora é vitalícia")) : "",
+    Number(l.trocas) ? item("cel", "Zerar trocas de aparelho", l.trocas + " de 3 trocas usadas em 30 dias · os aparelhos continuam ativos", () => rodar(() => api({acao: "admin_trocas", email: l.email}), "Trocas zeradas")) : "",
     Number(l.aparelhos) ? item("cel", "Liberar aparelhos", l.aparelhos + " de 2 em uso", () => rodar(() => api({acao: "admin_liberar", email: l.email}), "Aparelhos liberados")) : ""),
     semAcesso ? null : div("Pro"), semAcesso ? null : grupo(
     item("pro", l.cortesia ? "Tirar o Pro cortesia" : "Dar Pro de cortesia", l.cortesia ? "volta ao plano que pagou" : "Pro de presente, sem cobrança", () => rodar(() => api({acao: "admin_pro", email: l.email, pro: l.cortesia ? "0" : "1"}), l.cortesia ? "Cortesia retirada" : "Pro de cortesia ligado"), l.cortesia ? "" : "ouro")),
