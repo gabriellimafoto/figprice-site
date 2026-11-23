@@ -85,7 +85,10 @@ footer a{color:var(--gold);font-weight:800;text-decoration:none}
 const CHAVE = "AIzaSyBBhSENHJ5ugp4akSFRFXlsm9vM8fMfImo";
 const ZAP = '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.6-.3z"/></svg>';
 const app = document.getElementById("app");
-const arq = id => "https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(id) + "?alt=media&key=" + CHAVE;
+const HOSTS = ["www.googleapis.com", "content.googleapis.com"]; let hostBom = 0;
+const arq = (id, h) => "https://" + HOSTS[h == null ? hostBom : h] + "/drive/v3/files/" + encodeURIComponent(id) + "?alt=media&key=" + CHAVE;
+/* <img> que não carregou tenta o outro endereço uma vez */
+function imgFoto(im, id, aoCarregar){ let vez = 0; im.onerror = () => { if (vez++ < 1) im.src = arq(id, 1 - hostBom); else if (aoCarregar) aoCarregar(false); }; im.onload = () => { if (aoCarregar) aoCarregar(true); }; im.src = arq(id); }
 const esc = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const iniciais = n => (String(n || "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join("") || "★").toUpperCase();
 const LOG = "https://script.google.com/macros/s/AKfycbw4T6NZEemGmCQf1r_PoYeMVFq57wtigSd-XYc711VnBA5y58V0UBnkNgGv0e1bOqFixw/exec";
@@ -100,16 +103,22 @@ let cat = null;
 async function carregar(){
   const id = decodeURIComponent(location.hash.slice(1)).replace(/[^\w-]/g, "");
   if (!id){ aviso("Link incompleto", "Peça o link do catálogo de novo para o estúdio."); return; }
-  let erro = "";
-  for (let vez = 0; vez < 2 && !cat; vez++){
+  let erro = "", naoAchou = 0;
+  const tentativas = [[0, 0, 12000], [1, 1200, 12000], [0, 3000, 15000], [1, 5000, 20000]]; /* [endereço, pausa antes, tempo máximo] */
+  for (let vez = 0; vez < tentativas.length && !cat; vez++){
+    const [h, pausa, ms] = tentativas[vez];
+    if (pausa) await new Promise(ok => setTimeout(ok, pausa));
     try{
-      const r = await buscar(arq(id), vez ? 25000 : 15000);
+      const r = await buscar(arq(id, h), ms);
       const mot = r.ok ? "" : await motivo(r);
-      if (r.status === 404 || (r.status === 403 && !/rateLimit|quota|dailyLimit|keyInvalid|referer|API_KEY|accessNotConfigured/i.test(mot))){ registrar("catálogo indisponível " + mot + " " + id.slice(0, 6)); aviso("Este catálogo não está disponível", "O estúdio pode ter parado de compartilhar. Peça um link novo para ele."); return; }
+      if (r.status === 404 || (r.status === 403 && !/rateLimit|quota|dailyLimit|keyInvalid|referer|API_KEY|accessNotConfigured/i.test(mot))){
+        if (++naoAchou >= 2){ registrar("catálogo indisponível " + mot + " " + id.slice(0, 6)); aviso("Este catálogo não está disponível", "O estúdio pode ter parado de compartilhar. Peça um link novo para ele."); return; }
+        erro = mot; continue; } /* o Google às vezes diz "não encontrado" por um instante logo depois de o app atualizar o arquivo */
       if (!r.ok){ erro = mot; continue; }
-      cat = await r.json();
-    }catch(e){ erro = e && e.name === "AbortError" ? "demorou demais" : String((e && e.message) || e); }
+      cat = await r.json(); hostBom = h;
+    }catch(e){ erro = (e && e.name === "AbortError" ? "demorou demais" : String((e && e.message) || e)) + " (" + HOSTS[h] + ")"; }
   }
+  if (cat && erro) registrar("abriu depois de falhar: " + erro + " " + id.slice(0, 6)); /* para acompanhar se as falhas passageiras continuam */
   if (!cat){ registrar("não abriu o catálogo: " + erro + " " + id.slice(0, 6)); aviso("Não deu para abrir o catálogo", "O Google demorou para responder. Tente de novo em instantes.", erro, true); return; }
   const pecas = (cat.pecas || []).filter(p => p && p.f && p.f.length);
   document.title = (cat.estudio ? cat.estudio + " · " : "") + "Catálogo de peças";
@@ -123,27 +132,28 @@ async function carregar(){
     const c = document.createElement("button"); c.className = "c"; c.type = "button"; c.style.animationDelay = Math.min(i, 18) * .04 + "s";
     c.innerHTML = '<div class="f"><img alt="" loading="lazy">' + (p.f[0].r ? '<span class="tg">render</span>' : '') + '</div><div class="x"><b>' + esc(p.n) + '</b><small>' + esc(p.e) + '</small></div>';
     const im = c.querySelector("img"); im.loading = i < 12 ? "eager" : "lazy";
-    prontas.push(new Promise(ok => { im.onload = () => { im.classList.add("ok"); ok(); }; im.onerror = () => { registrar("miniatura não carregou " + i); ok(); }; }));
-    im.src = p.f[0].t || arq(p.f[0].m);
+    prontas.push(new Promise(ok => { const fim = deu => { if (deu) im.classList.add("ok"); else registrar("miniatura não carregou " + i); ok(); };
+      if (p.f[0].t){ im.onload = () => fim(true); im.onerror = () => imgFoto(im, p.f[0].m, fim); im.src = p.f[0].t; } else imgFoto(im, p.f[0].m, fim); }));
     c.onclick = () => abrir(p); g.append(c);
   });
   /* espera as primeiras miniaturas (no máximo 8 s) e mostra tudo de uma vez */
   await Promise.race([Promise.all(prontas.slice(0, 12)), new Promise(ok => setTimeout(ok, 8000))]);
   carr.classList.add("sai"); setTimeout(() => carr.remove(), 400);
   /* depois, baixa as fotos grandes por trás, uma de cada vez, na ordem das peças */
-  (async () => { for (const p of pecas) for (const f of p.f){ await new Promise(ok => { const x = new Image(); x.onload = x.onerror = ok; x.src = arq(f.g); setTimeout(ok, 15000); }); } })();
+  (async () => { for (const p of pecas.slice(0, 24)){ await new Promise(ok => { const x = new Image(); x.onload = x.onerror = ok; x.src = arq(p.f[0].g); setTimeout(ok, 15000); }); } })(); /* só a foto principal; as outras quando abrir a peça */
 }
 function abrir(p){
   const n = p.f.length, ov = document.createElement("div"); ov.className = "ov"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
   const fone = String(cat.zap || "").replace(/\D/g, ""), num = fone ? (fone.length <= 11 ? "55" : "") + fone : "";
   const msg = "Oi! Vi " + (p.n ? "o " + p.n + (p.e ? " " + p.e : "") : "uma peça") + " no seu catálogo e queria um orçamento.";
   ov.innerHTML = '<button class="fe" type="button" aria-label="Fechar">×</button><div class="meio"><div class="tkw"><div class="tk">'
-    + p.f.map((f, k) => '<div class="sl"><div class="fw carregando"><img alt="" onload="this.parentNode.classList.remove(\'carregando\')" src="' + esc(arq(f.g)) + '">' + (n > 1 ? '<span class="ct">' + (k + 1) + ' / ' + n + '</span>' : '') + (f.r ? '<span class="tg">render</span>' : '') + '</div></div>').join("")
+    + p.f.map((f, k) => '<div class="sl"><div class="fw carregando"><img alt="" data-id="' + esc(f.g) + '">' + (n > 1 ? '<span class="ct">' + (k + 1) + ' / ' + n + '</span>' : '') + (f.r ? '<span class="tg">render</span>' : '') + '</div></div>').join("")
     + '</div>' + (n > 1 ? '<button class="seta esq" type="button" aria-label="Foto anterior">‹</button><button class="seta dir" type="button" aria-label="Próxima foto">›</button>' : '') + '</div>'
     + '<div class="dt">' + (n > 1 ? p.f.map((_, k) => '<i' + (k ? '' : ' class="on"') + '></i>').join("") : '') + '</div>'
     + '<h2>' + esc(p.n) + '</h2><div class="es">' + (p.e ? 'escala ' + esc(p.e) : '') + '</div></div>'
     + (num ? '<a class="zap" href="https://wa.me/' + num + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener">' + ZAP + 'Quero orçar essa peça</a><p class="nt">Abre o WhatsApp ' + (cat.estudio ? 'do ' + esc(cat.estudio) : 'do estúdio') + '</p>' : '');
   document.body.append(ov); document.body.style.overflow = "hidden";
+  ov.querySelectorAll(".fw img[data-id]").forEach(im => imgFoto(im, im.dataset.id, () => im.parentNode.classList.remove("carregando")));
   const tk = ov.querySelector(".tk"), dots = [...ov.querySelectorAll(".dt i")];
   const atual = () => Math.round(tk.scrollLeft / (tk.querySelector(".sl").offsetWidth + 12));
   tk.addEventListener("scroll", () => { const k = atual(); dots.forEach((d, j) => d.classList.toggle("on", j === k)); }, {passive: true});

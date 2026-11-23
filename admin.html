@@ -881,6 +881,10 @@ function abrirReemb(){
       lst.forEach(e => { const it = E("div", "re-item" + (tp === "ERRO" ? " erro" : ""));
         it.append(E("b", "", e.texto.split(" | ")[0]), E("small", "", e.n + (e.n === 1 ? " vez" : " vezes") + " · " + e.quem.length + (e.quem.length === 1 ? " pessoa" : " pessoas") + (e.versoes.length ? " · versão " + e.versoes.join(", ") : "") + " · último " + new Date(e.ultimo).toLocaleString("pt-BR", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"})),
           E("small", "", e.quem.map(nomeDe).join(", ")));
+        /* v39 (Gabriel 23/11): erro resolvido some daqui; só volta se acontecer de novo depois */
+        if (e.chave){ const bt = E("button", "btn small", "Resolvido"); bt.style.cssText = "margin-top:8px";
+          bt.onclick = async () => { bt.disabled = true; bt.textContent = "Marcando…"; try{ const j = await api({acao: "admin_erro_resolver", chave: e.chave}); if (j && j.ok){ erros = erros.filter(x => x !== e); it.remove(); avisoErros(); return; } }catch(_){} bt.disabled = false; bt.textContent = "Não deu. Tentar de novo"; };
+          it.appendChild(bt); }
         corpo.appendChild(it); });
     });
   } else {
