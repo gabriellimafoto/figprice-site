@@ -6,6 +6,12 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#1a120d">
 <title>Catálogo de peças</title>
+<meta property="og:title" content="Catálogo de peças">
+<meta property="og:description" content="Veja as fotos das peças e peça o seu orçamento pelo WhatsApp.">
+<meta property="og:image" content="https://figprice.com.br/og-catalogo.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:type" content="website"><meta property="og:site_name" content="FigPrice">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -20,7 +26,15 @@ header{padding:calc(30px + env(safe-area-inset-top,0px)) 16px 18px;text-align:ce
 h1{margin:0;font-family:"Bricolage Grotesque",sans-serif;font-size:1.55rem;line-height:1.1;overflow-wrap:anywhere}
 header p{margin:6px 0 0;color:var(--muted);font-size:.9rem}
 .g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 16px;max-width:1100px;margin:0 auto}
-@media(min-width:600px){.g{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}}
+.g.dois{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:640px}
+@media(min-width:600px){.g{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}.g.dois{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.carr{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bg);transition:opacity .35s}
+.carr.sai{opacity:0;pointer-events:none}
+.carr .roda{margin:0}
+.carr span{color:var(--muted);font-size:.9rem}
+.aviso small{display:block;margin-top:14px;color:#7d6c5a;font-size:.72rem}
+.aviso button{margin-top:18px;padding:12px 22px;border:0;border-radius:12px;background:var(--gold);color:#241808;font-weight:800;cursor:pointer}
+.fw.carregando::before{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:g 1s linear infinite}
 .c{position:relative;display:flex;flex-direction:column;min-width:0;padding:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s;animation:e .45s cubic-bezier(.2,.8,.2,1) both}
 .c:active{transform:scale(.97)}
 @keyframes e{from{opacity:0;transform:translateY(12px) scale(.97)}}
@@ -74,36 +88,57 @@ const app = document.getElementById("app");
 const arq = id => "https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(id) + "?alt=media&key=" + CHAVE;
 const esc = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const iniciais = n => (String(n || "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join("") || "★").toUpperCase();
-function aviso(t, d){ app.innerHTML = '<div class="aviso"><b>' + esc(t) + '</b><span>' + esc(d) + '</span></div>'; }
+const LOG = "https://script.google.com/macros/s/AKfycbw4T6NZEemGmCQf1r_PoYeMVFq57wtigSd-XYc711VnBA5y58V0UBnkNgGv0e1bOqFixw/exec";
+let nLog = 0;
+function registrar(t){ if (nLog++ > 3) return; try{ navigator.sendBeacon(LOG, JSON.stringify({acao: "log_site", pagina: "/c", erro: String(t).slice(0, 700), ua: navigator.userAgent.slice(0, 120)})); }catch(_){} }
+addEventListener("error", e => { if (e.filename && /figprice/.test(e.filename)) registrar((e.message || "erro") + " @" + (e.lineno || "")); });
+function aviso(t, d, cod, tentar){ app.innerHTML = '<div class="aviso"><b>' + esc(t) + '</b><span>' + esc(d) + '</span>' + (tentar ? '<br><button type="button">Tentar de novo</button>' : '') + (cod ? '<small>código: ' + esc(cod) + '</small>' : '') + '</div>';
+  const b = app.querySelector(".aviso button"); if (b) b.onclick = () => { app.innerHTML = '<div class="roda"></div>'; carregar(); }; }
+async function buscar(url, ms){ const c = new AbortController(), t = setTimeout(() => c.abort(), ms); try{ return await fetch(url, {signal: c.signal, cache: "no-store"}); }finally{ clearTimeout(t); } }
+const motivo = async r => { try{ const j = await r.clone().json(); const e = j && j.error; return r.status + " " + ((e && e.errors && e.errors[0] && e.errors[0].reason) || (e && e.message) || ""); }catch(_){ return String(r.status); } };
 let cat = null;
 async function carregar(){
   const id = decodeURIComponent(location.hash.slice(1)).replace(/[^\w-]/g, "");
   if (!id){ aviso("Link incompleto", "Peça o link do catálogo de novo para o estúdio."); return; }
-  try{
-    const r = await fetch(arq(id));
-    if (r.status === 403 || r.status === 404){ aviso("Este catálogo não está disponível", "O estúdio pode ter parado de compartilhar. Peça um link novo para ele."); return; }
-    if (!r.ok) throw new Error("resposta " + r.status);
-    cat = await r.json();
-  }catch(e){ aviso("Não deu para abrir o catálogo", "Confira a sua internet e abra o link de novo."); return; }
+  let erro = "";
+  for (let vez = 0; vez < 2 && !cat; vez++){
+    try{
+      const r = await buscar(arq(id), vez ? 25000 : 15000);
+      const mot = r.ok ? "" : await motivo(r);
+      if (r.status === 404 || (r.status === 403 && !/rateLimit|quota|dailyLimit|keyInvalid|referer|API_KEY|accessNotConfigured/i.test(mot))){ registrar("catálogo indisponível " + mot + " " + id.slice(0, 6)); aviso("Este catálogo não está disponível", "O estúdio pode ter parado de compartilhar. Peça um link novo para ele."); return; }
+      if (!r.ok){ erro = mot; continue; }
+      cat = await r.json();
+    }catch(e){ erro = e && e.name === "AbortError" ? "demorou demais" : String((e && e.message) || e); }
+  }
+  if (!cat){ registrar("não abriu o catálogo: " + erro + " " + id.slice(0, 6)); aviso("Não deu para abrir o catálogo", "O Google demorou para responder. Tente de novo em instantes.", erro, true); return; }
   const pecas = (cat.pecas || []).filter(p => p && p.f && p.f.length);
   document.title = (cat.estudio ? cat.estudio + " · " : "") + "Catálogo de peças";
   if (!pecas.length){ aviso(cat.estudio || "Catálogo", "Ainda não há peças com foto neste catálogo."); return; }
+  const carr = document.createElement("div"); carr.className = "carr"; carr.innerHTML = '<div class="roda"></div><span>Carregando o catálogo…</span>'; document.body.append(carr);
   app.innerHTML = '<header><div class="lg">' + esc(iniciais(cat.estudio)) + '</div><h1>' + esc(cat.estudio || "Catálogo de peças") + '</h1><p>Toque numa peça para ver as fotos</p></header><div class="g"></div>'
     + '<footer>Catálogo feito com <a href="https://figprice.com.br/" target="_blank" rel="noopener">FigPrice</a></footer>';
-  const g = app.querySelector(".g");
+  const g = app.querySelector(".g"); if (pecas.length <= 4) g.classList.add("dois");
+  const prontas = [];
   pecas.forEach((p, i) => {
     const c = document.createElement("button"); c.className = "c"; c.type = "button"; c.style.animationDelay = Math.min(i, 18) * .04 + "s";
     c.innerHTML = '<div class="f"><img alt="" loading="lazy">' + (p.f[0].r ? '<span class="tg">render</span>' : '') + '</div><div class="x"><b>' + esc(p.n) + '</b><small>' + esc(p.e) + '</small></div>';
-    const im = c.querySelector("img"); im.onload = () => im.classList.add("ok"); im.src = arq(p.f[0].m);
+    const im = c.querySelector("img"); im.loading = i < 12 ? "eager" : "lazy";
+    prontas.push(new Promise(ok => { im.onload = () => { im.classList.add("ok"); ok(); }; im.onerror = () => { registrar("miniatura não carregou " + i); ok(); }; }));
+    im.src = p.f[0].t || arq(p.f[0].m);
     c.onclick = () => abrir(p); g.append(c);
   });
+  /* espera as primeiras miniaturas (no máximo 8 s) e mostra tudo de uma vez */
+  await Promise.race([Promise.all(prontas.slice(0, 12)), new Promise(ok => setTimeout(ok, 8000))]);
+  carr.classList.add("sai"); setTimeout(() => carr.remove(), 400);
+  /* depois, baixa as fotos grandes por trás, uma de cada vez, na ordem das peças */
+  (async () => { for (const p of pecas) for (const f of p.f){ await new Promise(ok => { const x = new Image(); x.onload = x.onerror = ok; x.src = arq(f.g); setTimeout(ok, 15000); }); } })();
 }
 function abrir(p){
   const n = p.f.length, ov = document.createElement("div"); ov.className = "ov"; ov.setAttribute("role", "dialog"); ov.setAttribute("aria-modal", "true");
   const fone = String(cat.zap || "").replace(/\D/g, ""), num = fone ? (fone.length <= 11 ? "55" : "") + fone : "";
   const msg = "Oi! Vi " + (p.n ? "o " + p.n + (p.e ? " " + p.e : "") : "uma peça") + " no seu catálogo e queria um orçamento.";
   ov.innerHTML = '<button class="fe" type="button" aria-label="Fechar">×</button><div class="meio"><div class="tkw"><div class="tk">'
-    + p.f.map((f, k) => '<div class="sl"><div class="fw' + '"><img alt="" src="' + esc(arq(f.g)) + '">' + (n > 1 ? '<span class="ct">' + (k + 1) + ' / ' + n + '</span>' : '') + (f.r ? '<span class="tg">render</span>' : '') + '</div></div>').join("")
+    + p.f.map((f, k) => '<div class="sl"><div class="fw carregando"><img alt="" onload="this.parentNode.classList.remove(\'carregando\')" src="' + esc(arq(f.g)) + '">' + (n > 1 ? '<span class="ct">' + (k + 1) + ' / ' + n + '</span>' : '') + (f.r ? '<span class="tg">render</span>' : '') + '</div></div>').join("")
     + '</div>' + (n > 1 ? '<button class="seta esq" type="button" aria-label="Foto anterior">‹</button><button class="seta dir" type="button" aria-label="Próxima foto">›</button>' : '') + '</div>'
     + '<div class="dt">' + (n > 1 ? p.f.map((_, k) => '<i' + (k ? '' : ' class="on"') + '></i>').join("") : '') + '</div>'
     + '<h2>' + esc(p.n) + '</h2><div class="es">' + (p.e ? 'escala ' + esc(p.e) : '') + '</div></div>'
