@@ -294,7 +294,7 @@ html,body{overflow-x:clip}
     <p class="nota">Acesso só para o administrador. Um código de 6 números chega no seu e-mail.</p>
     <div id="passo1">
       <label for="lEmail">E-mail do administrador</label>
-      <input id="lEmail" type="email" autocomplete="email" value="gbiel2008@hotmail.com">
+      <input id="lEmail" type="email" autocomplete="email" value="">
       <button class="btn ouro" style="width:100%;margin-top:14px" id="pedir">Enviar código</button>
     </div>
     <div id="passo2" hidden>
@@ -341,7 +341,7 @@ function toast(t){ const e = $("toast"); e.textContent = t; e.hidden = false; cl
    (com o motivo real: código da resposta, trecho da página de erro do Google, tempo, internet) e os toques. Quando existe erro ou falha
    ainda não enviado, manda para a aba Logs da planilha (Email "admin") na próxima vez que o Google responder.
    O Claude lê com: node ler-admin.js logs admin  (e os erros do próprio script: node ler-admin.js logs script). */
-const VERSAO_ADMIN = "2026-11-18";
+const VERSAO_ADMIN = "2026-11-24";
 function logA(tipo, txt){
   try{ const l = JSON.parse(localStorage.getItem("ff_admin_log") || "[]"); let t = Date.now(); if (l.length && l[l.length - 1][0] >= t) t = l[l.length - 1][0] + 1;
     l.push([t, tipo, String(txt == null ? "" : txt).slice(0, 900)]);
@@ -390,12 +390,38 @@ async function api(params){
 function mostrar(){
   $("telaLogin").hidden = !!token; $("telaPainel").hidden = !token;
   if (!token) return;
+  try{ if (!localStorage.getItem("ff_admin_aparelho_ok")) api({acao: "admin_aparelho", aparelho: aparelhoAdmin()}).then(j => { if (j && j.ok) localStorage.setItem("ff_admin_aparelho_ok", "1"); }).catch(() => {}); }catch(_){}
   try{ const c = JSON.parse(localStorage.getItem("ff_admin_cache") || "null"); if (Array.isArray(c) && !dados.length){ dados = c; desenhar(); } }catch(_){}
   carregar();
 }
+/* 24/11 (Gabriel: "alguém pediu o código do admin à 1h"): o campo de e-mail vem VAZIO para quem nunca entrou (antes vinha com o
+   e-mail do admin escrito e qualquer visitante disparava o código com um toque). Todo pedido de código e toda tentativa de entrar
+   mandam junto o RASTRO do aparelho: horário, aparelho (modelo de verdade no Chrome), local e internet pelo IP, e o que o app do
+   FigPrice guardou neste navegador (licença, conta do Google do backup, número do aparelho). O script cruza com as licenças. */
+try{ const em = localStorage.getItem("ff_admin_email"); if (em) $("lEmail").value = em; }catch(_){}
+function aparelhoAdmin(){ let id = localStorage.getItem("ff_admin_aparelho"); if (!id){ id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)); try{ localStorage.setItem("ff_admin_aparelho", id); }catch(_){} } return id; }
+let rastroGuardado = null;
+async function rastro(){
+  if (rastroGuardado) return JSON.stringify(rastroGuardado);
+  const r = {ua: navigator.userAgent.slice(0, 200), tela: screen.width + "x" + screen.height + " (janela " + innerWidth + "x" + innerHeight + ")", idioma: (navigator.languages || [navigator.language]).slice(0, 3).join(","),
+    fuso: (Intl.DateTimeFormat().resolvedOptions().timeZone || "") + " " + (-new Date().getTimezoneOffset() / 60), horaAparelho: new Date().toString().slice(0, 24),
+    toque: navigator.maxTouchPoints || 0, instalado: matchMedia("(display-mode: standalone)").matches ? "sim" : "não", veioDe: (document.referrer || "").slice(0, 120), adminAparelho: aparelhoAdmin()};
+  const lerJ = k => { try{ return JSON.parse(localStorage.getItem(k) || "null"); }catch(_){ return null; } };
+  const lic = lerJ("ff_licenca"), drv = lerJ("ff_drive");
+  if (lic && lic.email) r.licEmail = String(lic.email).slice(0, 80);
+  if (drv && drv.conta) r.drive = String(drv.conta).slice(0, 80);
+  try{ const ap = localStorage.getItem("ff_aparelho"); if (ap) r.aparelhoApp = ap.slice(0, 60); }catch(_){}
+  try{ if (localStorage.getItem("ff_clientes")) r.temClientes = "sim"; }catch(_){}
+  const tempo = (p, ms) => Promise.race([p, new Promise(ok => setTimeout(() => ok(null), ms))]);
+  try{ if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues){ const h = await tempo(navigator.userAgentData.getHighEntropyValues(["model", "platform", "platformVersion"]), 1200);
+    if (h){ r.modelo = String(h.model || "").slice(0, 60); r.sistema = (h.platform || "") + " " + (h.platformVersion || ""); } } }catch(_){}
+  try{ const g = await tempo(fetch("https://ipwho.is/", {cache: "no-store"}).then(x => x.json()), 2500);
+    if (g && g.success !== false){ r.ip = g.ip; r.cidade = g.city; r.regiao = g.region; r.pais = g.country; r.cep = g.postal; r.provedor = g.connection && (g.connection.isp || g.connection.org); r.lat = g.latitude; r.lon = g.longitude; } }catch(_){}
+  rastroGuardado = r; return JSON.stringify(r);
+}
 $("pedir").onclick = async () => {
   $("lErro").textContent = ""; $("pedir").disabled = true;
-  try{ const j = await api({acao: "admin_pedir", email: $("lEmail").value.trim().toLowerCase()});
+  try{ const j = await api({acao: "admin_pedir", email: $("lEmail").value.trim().toLowerCase(), rastro: await rastro()});
     if (j.ok){ $("passo1").hidden = true; $("passo2").hidden = false; $("lCodigo").focus(); } else $("lErro").textContent = j.erro; }
   catch(e){ $("lErro").textContent = "Sem conexão. Tente de novo."; }
   $("pedir").disabled = false;
@@ -403,8 +429,8 @@ $("pedir").onclick = async () => {
 $("entrar").onclick = async () => {
   $("lErro").textContent = "";
   const lembrar = $("lLembrar").checked;
-  try{ const j = await api({acao: "admin_entrar", codigo: $("lCodigo").value.trim(), lembrar: lembrar ? "1" : "0"});
-    if (j.ok){ token = j.token; (lembrar ? localStorage : sessionStorage).setItem("ff_admin", token); mostrar(); } else $("lErro").textContent = j.erro; }
+  try{ const j = await api({acao: "admin_entrar", codigo: $("lCodigo").value.trim(), lembrar: lembrar ? "1" : "0", rastro: await rastro()});
+    if (j.ok){ token = j.token; try{ localStorage.setItem("ff_admin_email", $("lEmail").value.trim().toLowerCase()); localStorage.setItem("ff_admin_aparelho_ok", "1"); }catch(_){} (lembrar ? localStorage : sessionStorage).setItem("ff_admin", token); mostrar(); } else $("lErro").textContent = j.erro; }
   catch(e){ $("lErro").textContent = "Sem conexão. Tente de novo."; }
 };
 $("lCodigo").onkeydown = e => { if (e.key === "Enter") $("entrar").click(); };
